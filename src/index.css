@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+/* Workstream I stage I1 -- one deliberate type scale, applied through the
+   existing Tailwind class names so the ~500 `text-*` usages across the app
+   shift in one place instead of file by file. The old scale leaned tiny
+   (help text at 10-11px, body at 14px) -- below both iOS and Android
+   minimums and the main reason the UI "felt off" on a phone. `text-xs` is
+   now the caption floor (13px); every 10px/11px arbitrary value was swept
+   onto it. Form controls stay locked at 16px lower down (the iOS zoom
+   guard), independent of this. */
+@theme {
+  --text-xs: 0.8125rem;   /* 13px -- captions, help text, badges (floor) */
+  --text-xs--line-height: 1.45;
+  --text-sm: 0.9375rem;   /* 15px -- labels, secondary text, list rows */
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;      /* 16px -- body copy */
+  --text-base--line-height: 1.55;
+  --text-lg: 1.1875rem;   /* 19px -- large values, sub-headings */
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.375rem;    /* 22px -- page titles (h1) */
+  --text-xl--line-height: 1.3;
+  --text-2xl: 1.625rem;   /* 26px -- hero secondary */
+  --text-2xl--line-height: 1.25;
+  --text-3xl: 2rem;       /* 32px -- the one hero number per screen */
+  --text-3xl--line-height: 1.15;
+}
+
+/* Settings rebuild, Stage 3 -- a user-chosen text-size multiplier on top
+   of the type scale above. Every `text-*` utility already reads these
+   variables at runtime (that's the whole point of the @theme block's own
+   comment), so overriding them under a more specific selector than the
+   bare :root the @theme block compiles to is enough to cascade app-wide
+   with zero per-component changes. 'default' sets no attribute, so it
+   falls through to the base values with no override block needed. */
+:root[data-text-scale="large"] {
+  --text-xs: 0.875rem;    /* 14px */
+  --text-sm: 1rem;        /* 16px */
+  --text-base: 1.0625rem; /* 17px */
+  --text-lg: 1.3125rem;   /* 21px */
+  --text-xl: 1.5rem;      /* 24px */
+  --text-2xl: 1.75rem;    /* 28px */
+  --text-3xl: 2.125rem;   /* 34px */
+}
+:root[data-text-scale="larger"] {
+  --text-xs: 0.9375rem;   /* 15px */
+  --text-sm: 1.0625rem;   /* 17px */
+  --text-base: 1.125rem;  /* 18px */
+  --text-lg: 1.375rem;    /* 22px */
+  --text-xl: 1.625rem;    /* 26px */
+  --text-2xl: 1.875rem;   /* 30px */
+  --text-3xl: 2.25rem;    /* 36px */
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+/* Onboarding overhaul, Stage 4: Header.jsx measures its own real
+   rendered height (which varies with env(safe-area-inset-top) per
+   device) and writes it here via ResizeObserver -- so a SECOND sticky
+   bar further down a page (CategorizeTransactions.jsx's fixed filter
+   row) can stack flush beneath it with `top: var(--app-header-height)`
+   instead of a guessed, device-wrong pixel offset. Defaults to 0 before
+   Header's first measurement. */
+:root {
+  --app-header-height: 0px;
+}
+
+/* Safety net -- no single element (a long bank-transaction description, a
+   wide flex row) should ever be able to create page-level horizontal
+   scroll, which can shift other content (like a toggle button) out of the
+   visible viewport. Individual flex rows are also fixed at the source
+   (min-w-0/shrink-0 on the relevant spans), this is defense in depth. */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Theme variables -- dark (:root) is the literal pre-theming palette this
+   app always had, unchanged in value, just moved from hardcoded hex/
+   Tailwind classes into named roles. :root[data-theme="light"] (see
+   ThemeContext.jsx, which sets this attribute on <html>) overrides every
+   one of them. Components reference the role (e.g. text-[var(--text-
+   primary)]), never a hardcoded shade, so nothing needs a `dark:` variant
+   duplicated everywhere. gradient-accent/modal-backdrop/notification-dot
+   are deliberately NOT here -- fixed-purpose colors, not theme-dependent,
+   see the plan this shipped from. */
+:root {
+  --bg-from: #14141f;
+  --bg-to: #08080c;
+  --bg-solid: #08080c;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+
+  --surface: #1e293b;
+  --surface-alt: #334155;
+  --surface-border: #334155;
+  --surface-border-subtle: #1e293b;
+
+  --glass-card-bg: rgba(30, 30, 40, 0.55);
+  --glass-card-border: rgba(255, 255, 255, 0.08);
+  --glass-panel-bg: rgba(20, 20, 28, 0.85);
+  --glass-panel-border: rgba(255, 255, 255, 0.1);
+  --hairline: rgba(255, 255, 255, 0.08);
+  /* ProgressRing's empty track -- a step brighter than --hairline so a 6px
+     stroke actually reads as "the track", not just a border-width smudge. */
+  --ring-track: rgba(255, 255, 255, 0.14);
+
+  --warn-bg: rgba(120, 53, 15, 0.4);
+  --success-bg: rgba(6, 78, 59, 0.4);
+  --info-bg: rgba(8, 51, 68, 0.3);
+  --warn-text: #fbbf24;
+  --danger-text: #f87171;
+  --success-text: #34d399;
+  --info-text: #22d3ee;
+}
+
+:root[data-theme="light"] {
+  /* Off-white, not pure white -- a flat #ffffff top-of-gradient read as
+     too bright on a real screen. Rebased one/two steps down the slate
+     scale; glass-card/panel backgrounds follow so they don't pop brighter
+     than the page behind them. */
+  --bg-from: #f8fafc;
+  --bg-to: #e2e8f0;
+  --bg-solid: #f1f5f9;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  /* Both re-picked for real WCAG AA contrast against this theme's light
+     backgrounds (measured, not guessed) -- the original slate-500/slate-400
+     values only cleared ~4.35:1 and ~2.34:1 respectively, well under the
+     4.5:1 minimum for normal text, and these two roles carry real content
+     (due dates, bill sublabels, help copy) on nearly every screen, not just
+     decoration. --text-muted now ~6.9:1, --text-faint ~5.7:1 -- still a
+     visibly lighter step than --text-muted, both comfortably over 4.5:1. */
+  --text-muted: #475569;
+  --text-faint: #56617a;
+
+  --surface: #f1f5f9;
+  --surface-alt: #e2e8f0;
+  --surface-border: #e2e8f0;
+  --surface-border-subtle: #f1f5f9;
+
+  --glass-card-bg: rgba(248, 250, 252, 0.65);
+  --glass-card-border: rgba(15, 23, 42, 0.08);
+  --glass-panel-bg: rgba(248, 250, 252, 0.85);
+  --glass-panel-border: rgba(15, 23, 42, 0.1);
+  --hairline: rgba(15, 23, 42, 0.08);
+  --ring-track: rgba(15, 23, 42, 0.12);
+
+  --warn-bg: rgba(254, 243, 199, 0.7);
+  --success-bg: rgba(209, 250, 229, 0.7);
+  --info-bg: rgba(207, 250, 254, 0.6);
+  --warn-text: #b45309;
+  --danger-text: #dc2626;
+  --success-text: #059669;
+  --info-text: #0891b2;
+}
+
+/* iOS rubber-band overscroll reveals whatever's behind the document --
+   which falls back to the browser's default white canvas unless html
+   itself has a background too, not just body. Flat color (not the
+   gradient below), since it'd look odd repeated/positioned behind an
+   overscrolled body. */
+html {
+  background: var(--bg-solid);
+}
+
+body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  /* Crisper text rendering on real devices -- the default weight looks
+     heavy on a dark background at these sizes. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: radial-gradient(ellipse at top, var(--bg-from) 0%, var(--bg-to) 70%);
+  background-attachment: fixed;
+  color: var(--text-secondary);
+  -webkit-tap-highlight-color: transparent;
+  /* Contains scroll chaining and the browser's own overscroll effects so
+     PullToRefresh.jsx's gesture (and the header refresh button) are the
+     only refresh affordances, and a stray overscroll doesn't reveal the
+     canvas behind the page. */
+  overscroll-behavior-y: contain;
+}
+
+/* Color concentrated in a few "hero" elements instead -- .glass-card/
+   .glass-panel are neutral glass (no color tint) for everything else;
+   .gradient-accent is the one shared blue->purple accent used consistently
+   everywhere something used to be flat cyan (primary buttons, active
+   toggle states, one hero card, ring strokes) -- tune the three stops here
+   once, not in N places. Deliberately the same in both themes. */
+@layer components {
+  .glass-card {
+    background: var(--glass-card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-card-border);
+    border-radius: 1.25rem;
+  }
+  .glass-panel {
+    background: var(--glass-panel-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-panel-border);
+    border-radius: 1.5rem;
+  }
+  .gradient-accent {
+    background-image: linear-gradient(135deg, #38bdf8 0%, #6366f1 55%, #9333ea 100%);
+  }
+}
+
+/* iOS Safari auto-zooms the viewport when a focused form field's
+   font-size is under 16px, to keep the text legible -- and doesn't
+   reliably zoom back out when the field belongs to a component that
+   unmounts on close (every modal in this app). !important since several
+   inputs carry Tailwind's text-sm/text-xs utility classes, which have
+   higher specificity than a bare element selector. */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Range slider styling -- default browser styling is inconsistent and ugly.
+   Thumb stays fixed-accent cyan in both themes (matches gradient-accent's
+   own treatment); the track is a neutral surface tone, so it needs to
+   flip with the theme same as everything else. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--surface-alt);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #22d3ee;
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 9999px;
+  background: #22d3ee;
+  cursor: pointer;
+}
