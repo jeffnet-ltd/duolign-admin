@@ -46,6 +46,22 @@ async function request(path, options = {}) {
 export const api = {
   admin: {
     login: (email, password) => request('/admin/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+    // 2026-10-17: TOTP 2FA, opt-in per admin. login() above returns
+    // {mfa_required, pending_token} instead of {token} for an enrolled
+    // admin -- this exchanges that plus a code for the real session.
+    verifyTotp: (pendingToken, code) => request('/admin/login/verify-totp', {
+      method: 'POST', body: JSON.stringify({ pending_token: pendingToken, code }),
+    }),
+    mfaStatus: (token) => request('/admin/mfa/status', { headers: { Authorization: `Bearer ${token}` } }),
+    mfaEnroll: (token) => request('/admin/mfa/enroll', { method: 'POST', headers: { Authorization: `Bearer ${token}` } }),
+    mfaConfirm: (token, code) => request('/admin/mfa/confirm', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ code }),
+    }),
+    mfaDisable: (token, password) => request('/admin/mfa/disable', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ password }),
+    }),
     householdCount: (token) => request('/admin/household-count', { headers: { Authorization: `Bearer ${token}` } }),
     signups: (token) => request('/admin/signups', { headers: { Authorization: `Bearer ${token}` } }),
     waitlist: (token) => request('/admin/waitlist', { headers: { Authorization: `Bearer ${token}` } }),

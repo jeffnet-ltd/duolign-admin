@@ -19,9 +19,15 @@ export function AdminProvider({ children }) {
       return null // private-window/blocked storage -- just means no remembered session
     }
   })
+  // 2026-10-17: opt-in TOTP 2FA -- a successful password check on an
+  // enrolled admin returns {mfa_required, pending_token} instead of a
+  // real token (server/routers/admin_auth.py's /login). Held here, not
+  // sessionStorage -- it's short-lived (5 min) and only ever needed for
+  // the one verifyTotp() call that completes login, never persisted
+  // across a reload.
+  const [mfaPendingToken, setMfaPendingToken] = useState(null)
 
-  const login = useCallback(async (email, password) => {
-    const { token: newToken } = await api.admin.login(email, password)
+  function _storeToken(newToken) {
     try {
       sessionStorage.setItem(STORAGE_KEY, newToken)
     } catch {
@@ -29,6 +35,26 @@ export function AdminProvider({ children }) {
       // just won't survive a reload. Not worth failing login over.
     }
     setToken(newToken)
+  }
+
+  const login = useCallback(async (email, password) => {
+    const result = await api.admin.login(email, password)
+    if (result.mfa_required) {
+      setMfaPendingToken(result.pending_token)
+      return { mfaRequired: true }
+    }
+    _storeToken(result.token)
+    return { mfaRequired: false }
+  }, [])
+
+  const verifyTotp = useCallback(async (code) => {
+    const { token: newToken } = await api.admin.verifyTotp(mfaPendingToken, code)
+    setMfaPendingToken(null)
+    _storeToken(newToken)
+  }, [mfaPendingToken])
+
+  const cancelMfa = useCallback(() => {
+    setMfaPendingToken(null)
   }, [])
 
   const logout = useCallback(() => {
@@ -38,10 +64,14 @@ export function AdminProvider({ children }) {
       // Nothing to clean up if storage was never reachable.
     }
     setToken(null)
+    setMfaPendingToken(null)
   }, [])
 
   return (
-    <AdminContext.Provider value={{ token, isAuthenticated: !!token, login, logout }}>
+    <AdminContext.Provider value={{
+      token, isAuthenticated: !!token, login, logout,
+      mfaPending: !!mfaPendingToken, verifyTotp, cancelMfa,
+    }}>
       {children}
     </AdminContext.Provider>
   )
