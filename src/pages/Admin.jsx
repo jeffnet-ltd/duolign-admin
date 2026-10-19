@@ -6,6 +6,7 @@ import { api } from '../api'
 import AdminMetricChart from '../components/AdminMetricChart'
 import Loading from '../components/Loading'
 import StatusDot from '../components/StatusDot'
+import PartnersSection from '../components/PartnersSection'
 
 // Admin-only cross-household dashboard (docs/ROADMAP.md's "Observability
 // & admin dashboard"). The REAL gate is server-side on every /api/admin/*
@@ -226,6 +227,7 @@ function Dashboard() {
       <WaitlistSection token={token} onSessionError={onSessionError} />
       <DeletionRequestsSection token={token} onSessionError={onSessionError} />
       <EntitlementsSection token={token} onSessionError={onSessionError} />
+      <PartnersSection token={token} onSessionError={onSessionError} />
       <AdminUsersSection token={token} onSessionError={onSessionError} />
       <LogsSection token={token} />
     </div>
