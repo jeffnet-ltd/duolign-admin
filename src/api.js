@@ -94,6 +94,20 @@ export const api = {
     resolveDeletionRequest: (token, requestId) => request(`/admin/deletion-requests/${encodeURIComponent(requestId)}/resolve`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}` },
     }),
+    // B2B voucher partnership programme (Couple_finance_app docs/VOUCHER_PROGRAMME_PLAN.md, stage 2).
+    partners: (token) => request('/admin/partners', { headers: { Authorization: `Bearer ${token}` } }),
+    enrolPartner: (token, body) => request('/admin/partners', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
+    }),
+    updatePartner: (token, partnerId, body) => request(`/admin/partners/${encodeURIComponent(partnerId)}`, {
+      method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
+    }),
+    setEnrolmentWindow: (token, body) => request('/admin/partner-programme/settings', {
+      method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
+    }),
+    revokeVoucher: (token, code) => request(`/admin/vouchers/${encodeURIComponent(code)}/revoke`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    }),
     logs: (token, lines) => request(`/admin/logs${lines ? `?lines=${lines}` : ''}`, { headers: { Authorization: `Bearer ${token}` } }),
   },
 }
