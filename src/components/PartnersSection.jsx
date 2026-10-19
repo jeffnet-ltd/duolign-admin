@@ -142,7 +142,7 @@ function EnrolForm({ token, categories, disabled, onEnrolled, onSessionError }) 
             </div>
           ))}
           <p className="text-xs text-[var(--text-faint)]">
-            Until the partner page exists (stage 3), send these to the business yourself.
+            The business sends them to clients from its partner page on duolign.co.uk.
           </p>
           <button type="button" onClick={() => setEnrolled(null)} className="text-xs text-[var(--text-muted)] underline">Dismiss</button>
         </div>
@@ -229,7 +229,7 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
 
       <div className="text-xs text-[var(--text-muted)] space-y-0.5">
         <p>
-          Enrolled {fmtDate(partner.enrolled_at)} · Complimentary redeemed {partner.complimentary_redeemed}/{partner.complimentary_total}
+          Enrolled {fmtDate(partner.enrolled_at)} · Complimentary sent {partner.complimentary_sent}/{partner.complimentary_total}, redeemed {partner.complimentary_redeemed}
         </p>
         <p>
           Send all 3 by {fmtDate(partner.distribution_deadline)} · Discount usable until {fmtDate(partner.discount_deadline)}
@@ -274,6 +274,14 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
                   : v.state[0].toUpperCase() + v.state.slice(1)}
               {v.kind === 'purchased' ? ` · ${v.duration_months}-month pack` : ''}
             </p>
+            {v.sent_to && (
+              <p className="text-xs text-[var(--text-faint)] break-all">
+                Sent to {v.sent_to} on {fmtDate(v.sent_at)}
+              </p>
+            )}
+            {v.sent_to_other_businesses_too && (
+              <p className="text-xs text-[var(--warn-text)]">This address has also had a voucher from another business.</p>
+            )}
           </div>
         ))}
       </div>
