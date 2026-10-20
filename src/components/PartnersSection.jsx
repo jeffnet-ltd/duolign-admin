@@ -256,6 +256,12 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
         </div>
       )}
 
+      <p className="text-xs text-[var(--text-muted)]">
+        First-pack discount:{' '}
+        {partner.discount_code
+          ? <><span className="font-mono text-[var(--text-primary)]">{partner.discount_code}</span>{partner.discount_used ? ' · used' : ' · not used yet'}</>
+          : 'not unlocked yet'}
+      </p>
       {partner.notes && <p className="text-xs text-[var(--text-faint)] whitespace-pre-line">{partner.notes}</p>}
 
       <div className="divide-y divide-[var(--surface-border)] border-t border-[var(--surface-border)]">
