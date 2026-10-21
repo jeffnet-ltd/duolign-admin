@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Check, Copy, Handshake } from 'lucide-react'
 import { api } from '../api'
 import Loading from './Loading'
+import PartnerReport from './PartnerReport'
 
 // B2B voucher partnership programme, stage 2 (Couple_finance_app
 // docs/VOUCHER_PROGRAMME_PLAN.md). Duolign enrols each partner business
@@ -312,6 +313,7 @@ export default function PartnersSection({ token, onSessionError }) {
       <h2 className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
         <Handshake size={13} strokeWidth={2} /> Partner businesses ({data.partners.length})
       </h2>
+      <PartnerReport report={data.report} categories={data.categories} />
       <EnrolmentWindow token={token} settings={data.settings} onSaved={refetch} onSessionError={onSessionError} />
       <EnrolForm
         token={token} categories={data.categories} disabled={!data.settings.enrolment_open}
