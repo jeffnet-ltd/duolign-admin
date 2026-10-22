@@ -1,15 +1,38 @@
-import { AdminProvider } from './context/AdminContext'
-import Admin from './pages/Admin'
+import { AdminProvider, useAdmin } from './context/AdminContext'
+import Shell, { useRoute } from './components/Shell'
+import LoginForm from './pages/Login'
+import Overview from './pages/Overview'
+import Customers from './pages/Customers'
+import Billing from './pages/Billing'
+import AppHealth from './pages/AppHealth'
+import Services from './pages/Services'
+import Errors from './pages/Errors'
+import SettingsPage from './pages/Settings'
 
-// Standalone admin site -- no routing, no household app scaffolding
-// (BrowserRouter, AuthProvider, DeviceLockGate, etc. from the consumer
-// app's App.jsx). Admin.jsx itself already renders its own login form
-// vs. dashboard based on AdminContext's token state, so this is the
-// entire app shell.
+// Standalone admin site, rebuilt as separate pages 2026-10-22. The real
+// gate is server-side on every /api/admin/* route (require_admin); the
+// login form here only stops a visitor seeing raw 401s.
+const PAGE_COMPONENTS = {
+  overview: Overview, customers: Customers, billing: Billing, app: AppHealth,
+  services: Services, errors: Errors, settings: SettingsPage,
+}
+
+function Routed() {
+  const { isAuthenticated } = useAdmin()
+  const route = useRoute()
+  if (!isAuthenticated) return <LoginForm />
+  const Page = PAGE_COMPONENTS[route]
+  return (
+    <Shell route={route}>
+      <Page key={route} />
+    </Shell>
+  )
+}
+
 export default function App() {
   return (
     <AdminProvider>
-      <Admin />
+      <Routed />
     </AdminProvider>
   )
 }

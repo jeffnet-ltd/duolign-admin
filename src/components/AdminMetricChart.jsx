@@ -99,7 +99,7 @@ export default function AdminMetricChart({
           </g>
 
           {labelIndices.map((i) => (
-            <text key={i} x={x(i)} y={height - 4} textAnchor="middle" className="text-[0.6rem]" fill="var(--text-faint)">
+            <text key={i} x={x(i)} y={height - 4} textAnchor={i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'} className="text-[0.6rem]" fill="var(--text-faint)">
               {formatDateLabel(series[i].date)}
             </text>
           ))}

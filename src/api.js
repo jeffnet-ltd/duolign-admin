@@ -108,6 +108,16 @@ export const api = {
     revokeVoucher: (token, code) => request(`/admin/vouchers/${encodeURIComponent(code)}/revoke`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}` },
     }),
+    // Multi-page dashboard, 2026-10-22.
+    overview: (token) => request('/admin/overview', { headers: { Authorization: `Bearer ${token}` } }),
+    services: (token, refresh = false) => request(`/admin/services${refresh ? '?refresh=true' : ''}`, { headers: { Authorization: `Bearer ${token}` } }),
+    audience: (token, days = 30) => request(`/admin/audience?days=${days}`, { headers: { Authorization: `Bearer ${token}` } }),
+    billing: (token, days = 30) => request(`/admin/billing?days=${days}`, { headers: { Authorization: `Bearer ${token}` } }),
+    appMetrics: (token, days = 30) => request(`/admin/app-metrics?days=${days}`, { headers: { Authorization: `Bearer ${token}` } }),
+    errors: (token, { query = 'is:unresolved', period = '14d', sort = 'date' } = {}) => request(
+      `/admin/errors?${new URLSearchParams({ query, period, sort })}`, { headers: { Authorization: `Bearer ${token}` } },
+    ),
+    errorDetail: (token, id) => request(`/admin/errors/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}` } }),
     logs: (token, lines) => request(`/admin/logs${lines ? `?lines=${lines}` : ''}`, { headers: { Authorization: `Bearer ${token}` } }),
   },
 }

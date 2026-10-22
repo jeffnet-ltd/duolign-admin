@@ -51,8 +51,10 @@
   --text-3xl: 2.25rem;    /* 36px */
 }
 
+/* min-height, not height: a fixed-height body with overflow-x hidden
+   becomes its own scroll box, so the window never scrolls. */
 html, body, #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 /* Onboarding overhaul, Stage 4: Header.jsx measures its own real
@@ -90,9 +92,9 @@ html, body {
   --bg-solid: #08080c;
 
   --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-faint: #64748b;
+  --text-secondary: #d6daf0;
+  --text-muted: #b1b7d8;
+  --text-faint: #9aa3c7;
 
   --surface: #1e293b;
   --surface-alt: #334155;
@@ -111,6 +113,7 @@ html, body {
   --warn-bg: rgba(120, 53, 15, 0.4);
   --success-bg: rgba(6, 78, 59, 0.4);
   --info-bg: rgba(8, 51, 68, 0.3);
+  --danger-bg: rgba(127, 29, 29, 0.35);
   --warn-text: #fbbf24;
   --danger-text: #f87171;
   --success-text: #34d399;
@@ -153,6 +156,7 @@ html, body {
   --warn-bg: rgba(254, 243, 199, 0.7);
   --success-bg: rgba(209, 250, 229, 0.7);
   --info-bg: rgba(207, 250, 254, 0.6);
+  --danger-bg: rgba(254, 226, 226, 0.75);
   --warn-text: #b45309;
   --danger-text: #dc2626;
   --success-text: #059669;
