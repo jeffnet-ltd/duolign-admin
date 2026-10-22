@@ -43,7 +43,7 @@ function useOverallStatus() {
   useEffect(() => {
     let alive = true
     const check = () => api.admin.services(token).then(
-      (d) => alive && setStatus(d.overall),
+      (d) => alive && setStatus(d?.overall ?? null),
       // No status means the request never got an answer at all.
       (err) => { if (err.status === 401) logout(); else if (alive) setStatus(err.status ? null : 'unreachable') },
     )

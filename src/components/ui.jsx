@@ -46,7 +46,12 @@ export function useAdminData(fetcher, deps = [], { poll } = {}) {
   load.current = (opts) => {
     setLoading(true)
     return fetcherRef.current(token, opts).then(
-      (d) => { setData(d); setError(null); setUpdatedAt(new Date()) },
+      (d) => {
+        // An older backend answers unknown routes with the app's HTML,
+        // which arrives here as null.
+        if (d == null) { setError('The server hasn’t been updated for this page yet. It will work once the latest backend is deployed.'); return }
+        setData(d); setError(null); setUpdatedAt(new Date())
+      },
       (err) => { if (err.status === 401) logout(); else setError(err.message) },
     ).finally(() => setLoading(false))
   }
