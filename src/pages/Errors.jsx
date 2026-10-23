@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { api } from '../api'
 import { useAdmin } from '../context/AdminContext'
@@ -68,6 +68,55 @@ function StatusActions({ id, status, onChanged }) {
             {busy === 'unresolved' ? 'Reopening…' : 'Reopen'}
           </button>
         )}
+      </div>
+      <ErrorNote>{error}</ErrorNote>
+    </div>
+  )
+}
+
+// Ticked issues, changed together (2026-10-23). "Similar" means the same
+// title: the same error turning up as separate Sentry issues.
+function BulkBar({ issues, selected, setSelected, onDone }) {
+  const { token } = useAdmin()
+  const [busy, setBusy] = useState(null)
+  const [error, setError] = useState(null)
+  const chosen = issues.filter((i) => selected.has(i.id))
+  const titles = new Set(chosen.map((i) => i.title))
+  const similar = issues.filter((i) => !selected.has(i.id) && titles.has(i.title))
+  const apply = async (status) => {
+    setBusy(status); setError(null)
+    try {
+      await api.admin.errorStatusBulk(token, chosen.map((i) => i.id), status)
+      setSelected(new Set())
+      onDone()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+  if (chosen.length === 0) return null
+  const btn = 'rounded-full border px-3 py-1.5 text-sm font-medium disabled:opacity-50'
+  const n = chosen.length
+  return (
+    <div className="sticky top-14 md:top-0 z-10 -mx-1 rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] p-2.5 space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-[var(--text-primary)] mr-1">{n} selected</span>
+        <button type="button" disabled={!!busy} onClick={() => apply('resolved')} className={`${btn} border-transparent bg-[var(--teal)] text-[var(--on-teal)]`}>
+          {busy === 'resolved' ? 'Resolving…' : `Mark ${n} resolved`}
+        </button>
+        <button type="button" disabled={!!busy} onClick={() => apply('ignored')} className={`${btn} border-[var(--surface-border)] text-[var(--text-primary)]`}>
+          {busy === 'ignored' ? 'Ignoring…' : 'Ignore'}
+        </button>
+        <button type="button" disabled={!!busy} onClick={() => apply('unresolved')} className={`${btn} border-[var(--surface-border)] text-[var(--text-primary)]`}>
+          {busy === 'unresolved' ? 'Reopening…' : 'Reopen'}
+        </button>
+        {similar.length > 0 && (
+          <button type="button" onClick={() => setSelected(new Set([...selected, ...similar.map((i) => i.id)]))} className="text-sm text-[var(--info-text)] underline underline-offset-2">
+            Also select {similar.length} like {n === 1 ? 'this' : 'these'}
+          </button>
+        )}
+        <button type="button" onClick={() => setSelected(new Set())} className="ml-auto text-sm text-[var(--text-muted)]">Clear</button>
       </div>
       <ErrorNote>{error}</ErrorNote>
     </div>
@@ -158,6 +207,9 @@ export default function Errors() {
   const [period, setPeriod] = useState('14d')
   const [sort, setSort] = useState('date')
   const [openId, setOpenId] = useState(null)
+  const [selected, setSelected] = useState(() => new Set())
+  // A different filter shows different issues: start the ticks again.
+  useEffect(() => { setSelected(new Set()) }, [status, period, sort])
   const { data, error, loading, updatedAt, reload } = useAdminData(
     (t) => api.admin.errors(t, { query: status, period, sort }), [status, period, sort], { poll: 120_000 },
   )
@@ -212,10 +264,30 @@ export default function Errors() {
         )}
       >
         {issues.length === 0 ? <Empty>No issues in this period. Good.</Empty> : (
+          <>
+          <BulkBar issues={issues} selected={selected} setSelected={setSelected} onDone={reload} />
+          <label className="flex items-center gap-2 px-1 text-sm text-[var(--text-muted)] cursor-pointer w-fit">
+            <input
+              type="checkbox" className="h-4 w-4 accent-[var(--teal)]"
+              checked={selected.size > 0 && issues.every((i) => selected.has(i.id))}
+              ref={(el) => { if (el) el.indeterminate = selected.size > 0 && !issues.every((i) => selected.has(i.id)) }}
+              onChange={(e) => setSelected(e.target.checked ? new Set(issues.map((i) => i.id)) : new Set())}
+            />
+            Select all ({issues.length})
+          </label>
           <ul className="divide-y divide-[var(--hairline)] -mx-1">
             {issues.map((i) => (
-              <li key={i.id}>
-                <button type="button" onClick={() => setOpenId(i.id)} className="w-full flex items-center gap-3 px-1 py-2.5 text-left hover:bg-[var(--surface-alt)]/40 rounded-lg">
+              <li key={i.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox" aria-label={`Select ${i.short_id}`} className="h-4 w-4 shrink-0 ml-1 accent-[var(--teal)] cursor-pointer"
+                  checked={selected.has(i.id)}
+                  onChange={() => setSelected((prev) => {
+                    const next = new Set(prev)
+                    if (next.has(i.id)) next.delete(i.id); else next.add(i.id)
+                    return next
+                  })}
+                />
+                <button type="button" onClick={() => setOpenId(i.id)} className="min-w-0 flex-1 flex items-center gap-3 px-1 py-2.5 text-left hover:bg-[var(--surface-alt)]/40 rounded-lg">
                   <div className="min-w-0 flex-1">
                     <p className={`text-sm font-medium truncate ${LEVEL[i.level] || 'text-[var(--text-primary)]'}`}>{i.title}</p>
                     {i.explanation && <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{i.explanation.summary}</p>}
@@ -231,6 +303,7 @@ export default function Errors() {
               </li>
             ))}
           </ul>
+          </>
         )}
       </Card>
     </div>
