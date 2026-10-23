@@ -23,7 +23,7 @@ const DASHBOARDS = {
 // Which server env var switches each check on, shown when it's off.
 const SETUP = {
   deploys: [
-    ['MONITOR_GITHUB_TOKEN', 'GitHub fine-grained token on Couple_finance_app: Contents, Checks and Metadata, all read-only'],
+    ['MONITOR_GITHUB_TOKEN', 'GitHub fine-grained token on Couple_finance_app: Contents, Actions and Metadata, all read-only'],
     ['RAILWAY_MONITOR_PROJECT_TOKEN', 'Railway project token for the production environment'],
   ],
   errors: [
