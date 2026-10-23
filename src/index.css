@@ -80,6 +80,16 @@ html, body {
   overflow-x: hidden;
 }
 
+/* The browser's own overscroll effects (its pull-to-refresh, the bounce
+   that reveals the canvas) are turned off so PullToRefresh.jsx's gesture
+   and the header refresh button are the only refresh affordances. On html
+   (the page), never body: overflow-x above makes body a scroll box of its
+   own with nothing to scroll, and "contain" there stopped the mouse wheel
+   and touch scrolling reaching the page at all (2026-10-23). */
+html {
+  overscroll-behavior-y: contain;
+}
+
 /* "Two of you" design system (2026-10-23): the colours live in
    design-system/tokens.css (copied from Couple_finance_app/design-system,
    which is the source; dark first, light when the device prefers it). The
@@ -133,11 +143,6 @@ body {
   background: var(--ground);
   color: var(--ink);
   -webkit-tap-highlight-color: transparent;
-  /* Contains scroll chaining and the browser's own overscroll effects so
-     PullToRefresh.jsx's gesture (and the header refresh button) are the
-     only refresh affordances, and a stray overscroll doesn't reveal the
-     canvas behind the page. */
-  overscroll-behavior-y: contain;
 }
 
 /* Old glass/gradient classes, kept by name: plain surfaces and solid teal now. */
