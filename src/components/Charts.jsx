@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 // Vertical bars over time. `series`: [{label, value}] or, stacked,
 // [{label, parts: {name: value}}] with `stack` naming the parts in order
 // and `colors` theirs.
-export function Bars({ series, stack, colors = ['#38bdf8'], height = 120, format = (v) => v, labelEvery }) {
+export function Bars({ series, stack, colors = ['var(--chart-1)'], height = 120, format = (v) => v, labelEvery }) {
   const totals = series.map((p) => (stack ? stack.reduce((t, k) => t + (p.parts?.[k] || 0), 0) : p.value || 0))
   const max = Math.max(1, ...totals)
   const every = labelEvery || Math.max(1, Math.ceil(series.length / 6))
@@ -57,7 +57,7 @@ export function Bars({ series, stack, colors = ['#38bdf8'], height = 120, format
   )
 }
 
-export function Sparkline({ values, color = '#f87171', width = 96, height = 24 }) {
+export function Sparkline({ values, color = 'var(--danger)', width = 96, height = 24 }) {
   const points = useMemo(() => {
     if (!values?.length) return ''
     const max = Math.max(1, ...values)
@@ -72,7 +72,7 @@ export function Sparkline({ values, color = '#f87171', width = 96, height = 24 }
 }
 
 // Horizontal bars, largest first -- funnels and breakdowns.
-export function HBars({ items, color = '#6366f1', format = (v) => v }) {
+export function HBars({ items, color = 'var(--teal-ink)', format = (v) => v }) {
   const max = Math.max(1, ...items.map((i) => i.value || 0))
   return (
     <div className="space-y-2.5">

@@ -50,19 +50,19 @@ export default function Customers() {
         <div className="grid gap-3">
           {!data.new_users.error && (
             <AdminMetricChart
-              title={`New sign-ups (${days} days)`} color="#38bdf8"
+              title={`New sign-ups (${days} days)`} color="var(--chart-1)"
               value={fmtNum(data.new_users.reduce((t, p) => t + p.value, 0))} series={data.new_users}
             />
           )}
           {!data.new_households.error && (
             <AdminMetricChart
-              title={`New households (${days} days)`} color="#9333ea"
+              title={`New households (${days} days)`} color="var(--chart-2)"
               value={fmtNum(data.new_households.current)} changePct={data.new_households.change_pct} series={data.new_households.series}
             />
           )}
           {!data.churn.error && (
             <AdminMetricChart
-              title={`Households deleted (${days} days)`} color="#f87171"
+              title={`Households deleted (${days} days)`} color="var(--danger)"
               value={fmtNum(data.churn.current)} changePct={data.churn.change_pct} series={data.churn.series}
             />
           )}

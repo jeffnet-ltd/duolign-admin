@@ -48,7 +48,7 @@ export default function AppHealth() {
             label: hourLabel(h.hour), short: hourLabel(h.hour),
             parts: { OK: h.requests - h.server_errors - h.client_errors, 'Client errors (4xx)': h.client_errors, 'Server errors (5xx)': h.server_errors },
           }))}
-          stack={['OK', 'Client errors (4xx)', 'Server errors (5xx)']} colors={['#38bdf8', '#fbbf24', '#f87171']} height={130}
+          stack={['OK', 'Client errors (4xx)', 'Server errors (5xx)']} colors={['var(--chart-1)', 'var(--warning)', 'var(--danger)']} height={130}
         />
       </Card>
 
@@ -85,7 +85,7 @@ export default function AppHealth() {
         ))}
         {!data.uptime.error && (
           <AdminMetricChart
-            title="Worker cycles completed (30 days)" color="#34d399"
+            title="Worker cycles completed (30 days)" color="var(--chart-3)"
             value={data.uptime.current == null ? '—' : `${data.uptime.current}%`} changePct={data.uptime.change_pct} series={data.uptime.series}
           />
         )}
