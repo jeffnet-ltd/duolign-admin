@@ -5,6 +5,7 @@ import {
 import { useAdmin } from '../context/AdminContext'
 import { api } from '../api'
 import { StatusDot } from './ui'
+import ThemeToggle from './ThemeToggle'
 
 export const PAGES = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -67,9 +68,12 @@ export default function Shell({ route, children }) {
             <img src="/favicon.png" alt="" className="w-6 h-6 rounded-md" />
             Duolign admin
           </a>
-          <button type="button" onClick={logout} className="md:hidden flex items-center gap-1 text-xs text-[var(--text-muted)]">
-            <LogOut size={13} strokeWidth={2} /> Sign out
-          </button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <button type="button" onClick={logout} className="md:hidden flex items-center gap-1 text-xs text-[var(--text-muted)]">
+              <LogOut size={13} strokeWidth={2} /> Sign out
+            </button>
+          </div>
         </div>
         <ul className="flex md:flex-col gap-0.5 overflow-x-auto px-2 py-2 md:px-3 md:py-0 [scrollbar-width:none]">
           {PAGES.map(({ id, label, icon: Icon }) => {
