@@ -96,7 +96,14 @@ export default function AppHealth() {
               { key: 'display_name', label: 'Household' },
               {
                 key: 'state', label: 'State',
-                render: (h) => <StatusBadge status={h.error || h.any_stale ? 'warn' : 'ok'} label={h.error || (h.any_stale ? 'Stale' : 'Fresh')} />,
+                // Names the steps that are behind (2026-10-23), not just "Stale".
+                render: (h) => (
+                  <div className="space-y-1">
+                    <StatusBadge status={h.error || h.any_stale ? 'warn' : 'ok'} label={h.error ? 'Couldn’t read' : h.any_stale ? 'Behind' : 'Fresh'} />
+                    {h.error && <p className="text-xs text-[var(--text-muted)] break-words">{h.error}</p>}
+                    {!h.error && h.behind?.length > 0 && <p className="text-xs text-[var(--text-muted)]">{h.behind.join(', ')}</p>}
+                  </div>
+                ),
               },
             ]}
           />

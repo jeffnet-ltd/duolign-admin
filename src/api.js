@@ -118,6 +118,10 @@ export const api = {
       `/admin/errors?${new URLSearchParams({ query, period, sort })}`, { headers: { Authorization: `Bearer ${token}` } },
     ),
     errorDetail: (token, id) => request(`/admin/errors/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}` } }),
+    // Resolve, ignore or reopen an issue in Sentry itself.
+    errorStatus: (token, id, status) => request(`/admin/errors/${encodeURIComponent(id)}/status`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ status }),
+    }),
     logs: (token, lines) => request(`/admin/logs${lines ? `?lines=${lines}` : ''}`, { headers: { Authorization: `Bearer ${token}` } }),
   },
 }

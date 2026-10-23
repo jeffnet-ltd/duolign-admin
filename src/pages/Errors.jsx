@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { api } from '../api'
+import { useAdmin } from '../context/AdminContext'
 import { Bars, Sparkline, dayLabel } from '../components/Charts'
 import Loading from '../components/Loading'
 import {
@@ -8,13 +9,76 @@ import {
 } from '../components/ui'
 
 // Sentry issues from the app and the backend, read through the server
-// (the Sentry token never reaches the browser). Read-only: resolving or
-// ignoring an issue is still done in Sentry.
+// (the Sentry token never reaches the browser). Each issue has a plain-
+// English explanation and fix steps (server/error_explainer.py) above the
+// raw detail, and can be resolved, ignored or reopened from here; the
+// change is made in Sentry itself (2026-10-23).
+
+const STATUS_LABEL = { resolved: 'Resolved', ignored: 'Ignored', unresolved: 'Unresolved' }
+
+function Explanation({ explanation }) {
+  if (!explanation) return null
+  return (
+    <Card title="What this means">
+      <p className="text-sm text-[var(--text-primary)]">{explanation.summary}</p>
+      <div className="space-y-1.5">
+        <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">How to fix it</p>
+        <ol className="list-decimal pl-5 space-y-1 text-sm text-[var(--text-secondary)]">
+          {explanation.fix.map((step, i) => <li key={i}>{step}</li>)}
+        </ol>
+      </div>
+    </Card>
+  )
+}
+
+// Resolve / Ignore / Reopen, written to Sentry. Sentry reopens a resolved
+// issue by itself if it happens again.
+function StatusActions({ id, status, onChanged }) {
+  const { token } = useAdmin()
+  const [busy, setBusy] = useState(null)
+  const [error, setError] = useState(null)
+  const set = async (next) => {
+    setBusy(next); setError(null)
+    try {
+      await api.admin.errorStatus(token, id, next)
+      onChanged(next)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+  const btn = 'rounded-full border px-3 py-1.5 text-sm font-medium disabled:opacity-50'
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-[var(--text-muted)]">Status: <span className="text-[var(--text-primary)]">{STATUS_LABEL[status] || status}</span></span>
+        {status !== 'resolved' && (
+          <button type="button" disabled={!!busy} onClick={() => set('resolved')} className={`${btn} border-transparent bg-[var(--teal)] text-[var(--on-teal)]`}>
+            {busy === 'resolved' ? 'Resolving…' : 'Mark resolved'}
+          </button>
+        )}
+        {status === 'unresolved' && (
+          <button type="button" disabled={!!busy} onClick={() => set('ignored')} className={`${btn} border-[var(--surface-border)] text-[var(--text-primary)]`}>
+            {busy === 'ignored' ? 'Ignoring…' : 'Ignore'}
+          </button>
+        )}
+        {status !== 'unresolved' && (
+          <button type="button" disabled={!!busy} onClick={() => set('unresolved')} className={`${btn} border-[var(--surface-border)] text-[var(--text-primary)]`}>
+            {busy === 'unresolved' ? 'Reopening…' : 'Reopen'}
+          </button>
+        )}
+      </div>
+      <ErrorNote>{error}</ErrorNote>
+    </div>
+  )
+}
 
 const LEVEL = { fatal: 'text-[var(--danger-text)]', error: 'text-[var(--danger-text)]', warning: 'text-[var(--warn-text)]' }
 
 function IssueDetail({ id, onBack }) {
   const { data, error } = useAdminData((t) => api.admin.errorDetail(t, id), [id])
+  const [status, setStatus] = useState(null)
   return (
     <div className="space-y-4">
       <button type="button" onClick={onBack} className="flex items-center gap-1 text-sm text-[var(--info-text)]">
@@ -28,6 +92,8 @@ function IssueDetail({ id, onBack }) {
             <h1 className="text-lg font-semibold text-[var(--text-primary)] break-words">{data.title}</h1>
             {data.culprit && <p className="text-sm text-[var(--text-muted)] break-words">{data.culprit}</p>}
           </div>
+          <StatusActions id={data.id} status={status || data.status} onChanged={setStatus} />
+          <Explanation explanation={data.explanation} />
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatTile label="Events" value={fmtNum(data.count)} />
             <StatTile label="People affected" value={fmtNum(data.users)} />
@@ -96,7 +162,8 @@ export default function Errors() {
     (t) => api.admin.errors(t, { query: status, period, sort }), [status, period, sort], { poll: 120_000 },
   )
 
-  if (openId) return <IssueDetail id={openId} onBack={() => setOpenId(null)} />
+  // Back to the list refetches, so a resolved issue drops off "Unresolved".
+  if (openId) return <IssueDetail id={openId} onBack={() => { setOpenId(null); reload() }} />
   if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <Loading />
 
   if (!data.configured) {
@@ -106,7 +173,7 @@ export default function Errors() {
         <Card title="Connect Sentry">
           <p className="text-sm text-[var(--text-secondary)]">Set these on the Railway service and redeploy:</p>
           <ul className="text-sm text-[var(--text-muted)] space-y-1 list-disc pl-5">
-            <li><code className="text-[var(--text-secondary)]">SENTRY_AUTH_TOKEN</code>: a Sentry internal integration (or personal) token with org:read, project:read and event:read</li>
+            <li><code className="text-[var(--text-secondary)]">SENTRY_AUTH_TOKEN</code>: a Sentry internal integration (or personal) token with org:read, project:read, event:read, and event:write to resolve issues from here</li>
             <li><code className="text-[var(--text-secondary)]">SENTRY_ORG</code>: your organisation slug (in the Sentry URL)</li>
           </ul>
         </Card>
@@ -151,8 +218,9 @@ export default function Errors() {
                 <button type="button" onClick={() => setOpenId(i.id)} className="w-full flex items-center gap-3 px-1 py-2.5 text-left hover:bg-[var(--surface-alt)]/40 rounded-lg">
                   <div className="min-w-0 flex-1">
                     <p className={`text-sm font-medium truncate ${LEVEL[i.level] || 'text-[var(--text-primary)]'}`}>{i.title}</p>
+                    {i.explanation && <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{i.explanation.summary}</p>}
                     <p className="text-xs text-[var(--text-muted)] truncate">
-                      {i.short_id} · {i.project}{i.culprit ? ` · ${i.culprit}` : ''}
+                      {i.short_id} · {i.project}{i.status && i.status !== 'unresolved' ? ` · ${STATUS_LABEL[i.status] || i.status}` : ''}{i.culprit ? ` · ${i.culprit}` : ''}
                     </p>
                     <p className="text-xs text-[var(--text-faint)]">
                       {fmtNum(i.count)} events · {fmtNum(i.users)} people · last {timeAgo(i.last_seen)} · first {timeAgo(i.first_seen)}
