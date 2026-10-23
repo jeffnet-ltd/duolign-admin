@@ -1,0 +1,129 @@
+/* Duolign — generated from tokens.json by build_tokens.py. Do not edit by hand. */
+
+:root, [data-theme="dark"] {
+  --ground: #0f1615;
+  --surface: #162120;
+  --surface-soft: #1e2d2b;
+  --nav: #121b1a;
+  --line: #26332f;
+  --line-strong: #667a75;
+  --ink: #e9f0ee;
+  --ink-muted: #a8b8b4;
+  --ink-faint: #8b9d98;
+  --teal: #2f7f77;
+  --on-teal: #ffffff;
+  --teal-ink: #7cc4b8;
+  --teal-soft: #173a36;
+  --partner-a: #6aa6ec;
+  --partner-b: #b99cec;
+  --on-partner: #0f1615;
+  --success: #9bd48a;
+  --success-soft: #1b2c1f;
+  --warning: #e9b55e;
+  --warning-soft: #30281a;
+  --danger: #f2917f;
+  --danger-soft: #33201d;
+  --focus: var(--teal-ink);
+  --scrim: rgba(5, 10, 9, 0.64);
+  --chart-1: #7cc4b8;
+  --chart-2: #e2b45f;
+  --chart-3: #a9cc8c;
+  --chart-4: #df9c7f;
+  --chart-5: #cdbb93;
+  --chart-6: #9fb0ba;
+  --shadow-sheet: 0 -8px 32px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --ground: #f5f7f6;
+  --surface: #ffffff;
+  --surface-soft: #e6eeec;
+  --nav: #ffffff;
+  --line: #dbe3e1;
+  --line-strong: #76857f;
+  --ink: #13201e;
+  --ink-muted: #4a5b57;
+  --ink-faint: #5f6e6a;
+  --teal: #1e5f5a;
+  --on-teal: #ffffff;
+  --teal-ink: #1e5f5a;
+  --teal-soft: #dcebe8;
+  --partner-a: #2a64ad;
+  --partner-b: #6a4ab0;
+  --on-partner: #ffffff;
+  --success: #2f7a35;
+  --success-soft: #e6f2e3;
+  --warning: #8a5a00;
+  --warning-soft: #f8eedb;
+  --danger: #b42d22;
+  --danger-soft: #f9e5e1;
+  --focus: var(--teal-ink);
+  --scrim: rgba(19, 32, 30, 0.40);
+  --chart-1: #1e5f5a;
+  --chart-2: #8a5a00;
+  --chart-3: #4a7a35;
+  --chart-4: #a4532f;
+  --chart-5: #7a6a3f;
+  --chart-6: #55646d;
+  --shadow-sheet: 0 -8px 32px rgba(19, 32, 30, 0.12);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --ground: #f5f7f6;
+    --surface: #ffffff;
+    --surface-soft: #e6eeec;
+    --nav: #ffffff;
+    --line: #dbe3e1;
+    --line-strong: #76857f;
+    --ink: #13201e;
+    --ink-muted: #4a5b57;
+    --ink-faint: #5f6e6a;
+    --teal: #1e5f5a;
+    --on-teal: #ffffff;
+    --teal-ink: #1e5f5a;
+    --teal-soft: #dcebe8;
+    --partner-a: #2a64ad;
+    --partner-b: #6a4ab0;
+    --on-partner: #ffffff;
+    --success: #2f7a35;
+    --success-soft: #e6f2e3;
+    --warning: #8a5a00;
+    --warning-soft: #f8eedb;
+    --danger: #b42d22;
+    --danger-soft: #f9e5e1;
+    --focus: var(--teal-ink);
+    --scrim: rgba(19, 32, 30, 0.40);
+    --chart-1: #1e5f5a;
+    --chart-2: #8a5a00;
+    --chart-3: #4a7a35;
+    --chart-4: #a4532f;
+    --chart-5: #7a6a3f;
+    --chart-6: #55646d;
+    --shadow-sheet: 0 -8px 32px rgba(19, 32, 30, 0.12);
+    color-scheme: light;
+  }
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --control-lg: 52px;
+  --control-md: 44px;
+  --control-sm: 36px;
+  --action-round: 56px;
+  --person-mark: 34px;
+  --font-sans: "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

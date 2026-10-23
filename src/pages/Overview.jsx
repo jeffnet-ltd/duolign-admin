@@ -93,7 +93,7 @@ export default function Overview() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {!data.new_households?.error && (
           <AdminMetricChart
-            title="New households (30 days)" color="#9333ea"
+            title="New households (30 days)" color="var(--chart-2)"
             value={fmtNum(data.new_households.current)} changePct={data.new_households.change_pct} series={data.new_households.series}
           />
         )}
@@ -103,23 +103,23 @@ export default function Overview() {
               label: hourLabel(h.hour), short: hourLabel(h.hour),
               parts: { OK: h.requests - h.server_errors - h.client_errors, 'Client errors': h.client_errors, 'Server errors': h.server_errors },
             }))}
-            stack={['OK', 'Client errors', 'Server errors']} colors={['#38bdf8', '#fbbf24', '#f87171']} height={100}
+            stack={['OK', 'Client errors', 'Server errors']} colors={['var(--chart-1)', 'var(--warning)', 'var(--danger)']} height={100}
           />
         </Card>
         <Card title="Errors reported to Sentry (14 days)" action={<button type="button" onClick={() => go('errors')} className="text-xs text-[var(--info-text)]">Errors</button>}>
           {data.errors_per_day && !data.errors_per_day.error ? (
-            <Bars series={data.errors_per_day.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['#f87171']} height={100} />
+            <Bars series={data.errors_per_day.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['var(--danger)']} height={100} />
           ) : (
             <p className="text-sm text-[var(--text-muted)]">Connect Sentry on the server (SENTRY_AUTH_TOKEN, SENTRY_ORG) to see this.</p>
           )}
         </Card>
         {stripe ? (
           <Card title="Money taken (30 days)">
-            <Bars series={stripe.series.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['#34d399']} height={100} format={(v) => fmtMoney(v)} />
+            <Bars series={stripe.series.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['var(--chart-3)']} height={100} format={(v) => fmtMoney(v)} />
           </Card>
         ) : !data.uptime?.error && (
           <AdminMetricChart
-            title="Worker uptime (30 days)" color="#34d399"
+            title="Worker uptime (30 days)" color="var(--chart-3)"
             value={data.uptime.current == null ? '—' : `${data.uptime.current}%`} changePct={data.uptime.change_pct} series={data.uptime.series}
           />
         )}

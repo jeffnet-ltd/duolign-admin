@@ -36,7 +36,7 @@ function IssueDetail({ id, onBack }) {
           </div>
           {data.trend?.length > 0 && (
             <Card title="Events per day (14 days)">
-              <Bars series={data.trend.map((v, i) => ({ label: `${data.trend.length - i - 1}d ago`, short: '', value: v }))} colors={['#f87171']} height={80} />
+              <Bars series={data.trend.map((v, i) => ({ label: `${data.trend.length - i - 1}d ago`, short: '', value: v }))} colors={['var(--danger)']} height={80} />
             </Card>
           )}
           <Card title="Latest event" action={data.permalink && <ExtLink href={data.permalink}>Open in Sentry</ExtLink>}>
@@ -130,7 +130,7 @@ export default function Errors() {
 
       {data.events_per_day && (
         <Card title="Error events per day (14 days)">
-          <Bars series={data.events_per_day.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['#f87171']} height={100} />
+          <Bars series={data.events_per_day.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['var(--danger)']} height={100} />
         </Card>
       )}
 

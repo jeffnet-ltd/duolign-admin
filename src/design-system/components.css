@@ -1,0 +1,167 @@
+/* Duolign components. Plain CSS classes (prefix dl-) over the tokens in tokens.css,
+   so the app, the website and the admin site share one look without a framework.
+   Every colour, size and radius comes from a token; nothing here is a raw value
+   except borders' 1px and focus geometry. */
+/* The font is loaded by each surface, not here: the app self-hosts it (@fontsource-variable/instrument-sans,
+   so it never calls Google), the website and admin link Google Fonts. The design system artifact's copy of
+   this file adds a Google Fonts @import for its previews. */
+
+/* Text scales with --dl-text-scale (default 1), so a surface with its own text-size setting
+   (the app) can enlarge every component's text without touching the layout. */
+.dl, .dl * { box-sizing: border-box; }
+.dl { font-family: var(--font-sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+.dl-num { font-variant-numeric: tabular-nums; }
+.dl :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Buttons: one primary per screen, pills throughout. */
+.dl-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: var(--control-md); padding: 0 var(--space-5); border-radius: var(--radius-pill);
+  border: 1px solid transparent; background: var(--teal); color: var(--on-teal);
+  font: inherit; font-size: calc(15px * var(--dl-text-scale, 1)); font-weight: 600; line-height: 1; cursor: pointer; text-decoration: none;
+}
+.dl-btn--block { display: flex; width: 100%; }
+.dl-btn--lg { min-height: var(--control-lg); font-size: calc(16px * var(--dl-text-scale, 1)); }
+.dl-btn--secondary { background: transparent; color: var(--ink); border-color: var(--line-strong); font-weight: 500; }
+.dl-btn--quiet { background: transparent; color: var(--teal-ink); font-weight: 500; padding: 0 var(--space-3); }
+.dl-btn--danger { background: transparent; color: var(--danger); border-color: var(--line-strong); font-weight: 500; }
+.dl-btn:disabled, .dl-btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+
+/* Social sign-in: full width, logo + words, a matching neutral pair, above the email form. */
+.dl-social {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-3); width: 100%;
+  min-height: var(--control-lg); border-radius: var(--radius-pill); border: 1px solid var(--line-strong);
+  background: var(--surface); color: var(--ink); font: inherit; font-size: calc(16px * var(--dl-text-scale, 1)); font-weight: 500; cursor: pointer;
+}
+.dl-social__logo { width: 20px; height: 20px; flex: none; }
+.dl-or { display: flex; align-items: center; gap: var(--space-3); color: var(--ink-faint); font-size: calc(13px * var(--dl-text-scale, 1)); }
+.dl-or::before, .dl-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+/* The one number per screen. Always labelled in words. */
+.dl-hero { display: flex; flex-direction: column; gap: 6px; }
+.dl-hero__label { font-size: calc(14px * var(--dl-text-scale, 1)); line-height: 1.43; color: var(--ink-muted); }
+.dl-hero__amount { font-size: calc(46px * var(--dl-text-scale, 1)); line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.dl-hero__pence { font-size: calc(26px * var(--dl-text-scale, 1)); color: var(--ink-muted); }
+.dl-hero__sub { display: flex; align-items: center; gap: var(--space-2); font-size: calc(14px * var(--dl-text-scale, 1)); color: var(--ink-muted); }
+
+/* People. Partner colours only ever appear as these small marks. */
+.dl-person {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: var(--person-mark); height: var(--person-mark); border-radius: 50%;
+  font-size: calc(14px * var(--dl-text-scale, 1)); font-weight: 600; color: var(--on-partner); background: var(--partner-a);
+}
+.dl-person--b { background: var(--partner-b); }
+.dl-person--sm { width: 24px; height: 24px; font-size: calc(11px * var(--dl-text-scale, 1)); font-weight: 700; }
+.dl-person-pair { display: inline-flex; }
+.dl-person-pair .dl-person { border: 2px solid var(--ground); }
+.dl-person-pair .dl-person + .dl-person { margin-left: -10px; }
+.dl-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--partner-a); }
+.dl-dot--b { background: var(--partner-b); }
+.dl-dot--ours { background: var(--teal-ink); }
+
+/* Segmented tabs: one page, a few kinds of the same thing. */
+.dl-seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); padding: 4px; border-radius: var(--radius-pill); background: var(--surface-soft); }
+.dl-seg__tab {
+  min-height: var(--control-sm); padding: 4px 6px; text-align: center; border: 0; border-radius: var(--radius-pill); background: transparent;
+  color: var(--ink-muted); font: inherit; font-size: calc(14px * var(--dl-text-scale, 1)); font-weight: 500; line-height: 1.2; cursor: pointer;
+}
+/* aria-selected for tabs inside a page; aria-current for tabs that are links to pages. */
+.dl-seg__tab[aria-selected="true"], .dl-seg__tab[aria-current="page"] { background: var(--surface); color: var(--ink); font-weight: 600; }
+
+/* Chips: filters (Mine / Sam's / Joint) and single choices (a category). */
+.dl-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.dl-chip {
+  display: inline-flex; align-items: center; gap: 6px; min-height: var(--control-sm); padding: 0 14px;
+  border-radius: var(--radius-pill); border: 1px solid var(--line-strong); background: transparent;
+  color: var(--ink); font: inherit; font-size: calc(14px * var(--dl-text-scale, 1)); font-weight: 500; cursor: pointer;
+}
+.dl-chip[aria-pressed="true"], .dl-chip[aria-current="page"] { background: var(--teal); border-color: var(--teal); color: var(--on-teal); }
+
+/* Section heading above a grouped list. */
+.dl-overline { font-size: calc(13px * var(--dl-text-scale, 1)); line-height: 1.4; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-muted); }
+.dl-section { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* Grouped list: rows share ONE surface, split by hairlines. A row never gets its own card. */
+.dl-list { display: flex; flex-direction: column; border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
+.dl-row {
+  display: flex; align-items: center; gap: var(--space-3); padding: 14px var(--space-4);
+  color: var(--ink); text-decoration: none; background: transparent; border: 0; width: 100%; text-align: left; font: inherit;
+}
+.dl-row + .dl-row { border-top: 1px solid var(--line); }
+a.dl-row, button.dl-row { cursor: pointer; }
+.dl-row__lead { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-soft); display: flex; align-items: center; justify-content: center; font-size: calc(13px * var(--dl-text-scale, 1)); font-weight: 700; flex: none; }
+.dl-row__main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dl-row__title { font-size: calc(16px * var(--dl-text-scale, 1)); line-height: 1.375; font-weight: 500; }
+.dl-row__sub { display: flex; align-items: center; gap: 6px; font-size: calc(13px * var(--dl-text-scale, 1)); line-height: 1.4; color: var(--ink-muted); }
+.dl-row__value { font-size: calc(16px * var(--dl-text-scale, 1)); font-weight: 500; font-variant-numeric: tabular-nums; flex: none; }
+.dl-row__chev { width: 16px; height: 16px; color: var(--ink-faint); flex: none; }
+.dl-row--total .dl-row__title, .dl-row--total .dl-row__value { font-weight: 600; }
+
+/* Card: the one thing on a screen that matters most (e.g. Needs your OK, an opened transaction). */
+.dl-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--line); }
+.dl-card--focus { border-color: var(--teal-ink); }
+.dl-card__eyebrow { display: flex; align-items: center; gap: var(--space-2); font-size: calc(13px * var(--dl-text-scale, 1)); font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: var(--teal-ink); }
+.dl-card__actions { display: flex; gap: var(--space-2); }
+.dl-card__actions > .dl-btn { flex: 1; }
+
+/* Notice: a calm inline message. Tinted fill, no stripe, no glow. */
+.dl-notice { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-soft); color: var(--ink); font-size: calc(14px * var(--dl-text-scale, 1)); line-height: 1.43; }
+.dl-notice__icon { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--teal-ink); }
+.dl-notice--success { background: var(--success-soft); } .dl-notice--success .dl-notice__icon { color: var(--success); }
+.dl-notice--warning { background: var(--warning-soft); } .dl-notice--warning .dl-notice__icon { color: var(--warning); }
+.dl-notice--danger { background: var(--danger-soft); } .dl-notice--danger .dl-notice__icon { color: var(--danger); }
+.dl-notice a { color: inherit; font-weight: 600; }
+
+/* Round quick actions under the hero. Payday is the teal one. */
+.dl-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); }
+.dl-action { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); color: var(--ink); text-decoration: none; font-size: calc(13px * var(--dl-text-scale, 1)); font-weight: 500; background: none; border: 0; font-family: inherit; cursor: pointer; }
+.dl-action__disc { position: relative; width: var(--action-round); height: var(--action-round); border-radius: 50%; background: var(--surface-soft); color: var(--ink); display: flex; align-items: center; justify-content: center; }
+.dl-action--primary .dl-action__disc { background: var(--teal); color: var(--on-teal); }
+.dl-action__badge { position: absolute; top: -2px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--ink); color: var(--ground); font-size: calc(11px * var(--dl-text-scale, 1)); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+/* Bottom tab bar: Home · Payday · Money · Plan · More. */
+.dl-tabbar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom, 0px)); background: var(--nav); border-top: 1px solid var(--line); }
+.dl-tabbar__item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: var(--ink-muted); text-decoration: none; font-size: calc(11px * var(--dl-text-scale, 1)); line-height: 1.25; font-weight: 500; }
+.dl-tabbar__item[aria-current="page"] { color: var(--teal-ink); font-weight: 600; }
+.dl-tabbar__badge { position: absolute; top: 2px; left: 55%; width: 8px; height: 8px; border-radius: 50%; background: var(--teal-ink); }
+
+/* Step progress: a quiet line of segments, then words ("Step 2 of 5 · Already-paid"). */
+.dl-steps { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
+.dl-steps__seg { height: 4px; border-radius: 2px; background: var(--line); }
+.dl-steps__seg[data-done="true"] { background: var(--teal-ink); }
+.dl-steps__label { font-size: calc(13px * var(--dl-text-scale, 1)); color: var(--ink-muted); }
+
+/* Split bar: each partner's share, two solid colours with a gap. Never blended. */
+.dl-split { display: flex; gap: 3px; height: 12px; }
+.dl-split__a { background: var(--partner-a); border-radius: 6px 2px 2px 6px; }
+.dl-split__b { background: var(--partner-b); border-radius: 2px 6px 6px 2px; }
+
+/* Premium: a calm chip, and a blurred SAMPLE (never real data) under a message. */
+.dl-premium { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-sm); background: var(--teal-soft); color: var(--teal-ink); font-size: calc(12px * var(--dl-text-scale, 1)); font-weight: 600; line-height: 1.5; }
+.dl-locked { position: relative; overflow: hidden; border-radius: var(--radius-lg); }
+.dl-locked__sample { filter: blur(5px); opacity: 0.55; pointer-events: none; user-select: none; }
+.dl-locked__panel { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: var(--space-4); }
+.dl-locked__msg { max-width: 300px; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); text-align: center; padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--line); font-size: calc(14px * var(--dl-text-scale, 1)); color: var(--ink-muted); }
+.dl-locked__msg strong { color: var(--ink); font-size: calc(15px * var(--dl-text-scale, 1)); }
+
+/* Fields. */
+.dl-field { display: flex; flex-direction: column; gap: 6px; }
+.dl-field__label { font-size: calc(14px * var(--dl-text-scale, 1)); font-weight: 500; color: var(--ink); }
+.dl-field__help { font-size: calc(13px * var(--dl-text-scale, 1)); color: var(--ink-muted); }
+.dl-input { width: 100%; min-height: var(--control-md); padding: 0 14px; border-radius: var(--radius-md); border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font: inherit; font-size: calc(16px * var(--dl-text-scale, 1)); }
+.dl-input::placeholder { color: var(--ink-faint); }
+.dl-field--error .dl-input { border-color: var(--danger); }
+.dl-field__error { font-size: calc(13px * var(--dl-text-scale, 1)); color: var(--danger); }
+
+/* Switch. */
+.dl-switch { position: relative; width: 48px; height: 28px; flex: none; border-radius: var(--radius-pill); border: 1px solid var(--line-strong); background: var(--surface-soft); cursor: pointer; padding: 0; }
+.dl-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink-muted); transition: transform 0.15s ease; }
+.dl-switch[aria-checked="true"] { background: var(--teal); border-color: var(--teal); }
+.dl-switch[aria-checked="true"]::after { transform: translateX(20px); background: var(--on-teal); }
+
+/* Top bar on a pushed screen: back, title, one optional action. */
+.dl-topbar { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: var(--space-2); }
+.dl-topbar__title { text-align: center; font-size: calc(17px * var(--dl-text-scale, 1)); font-weight: 600; }
+.dl-icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--ink); display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) { .dl-switch::after { transition: none; } }

@@ -26,7 +26,7 @@ function formatDateLabel(iso) {
 }
 
 export default function AdminMetricChart({
-  title, value, changePct, series, color = '#38bdf8', height = 90,
+  title, value, changePct, series, color = 'var(--chart-1)', height = 90,
 }) {
   const clipId = useId()
   const gradientId = useId()

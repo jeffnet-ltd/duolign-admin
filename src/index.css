@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./design-system/tokens.css";
+@import "./design-system/components.css" layer(components);
 
 /* Workstream I stage I1 -- one deliberate type scale, applied through the
    existing Tailwind class names so the ~500 `text-*` usages across the app
@@ -9,6 +11,7 @@
    onto it. Form controls stay locked at 16px lower down (the iOS zoom
    guard), independent of this. */
 @theme {
+  --font-sans: "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --text-xs: 0.8125rem;   /* 13px -- captions, help text, badges (floor) */
   --text-xs--line-height: 1.45;
   --text-sm: 0.9375rem;   /* 15px -- labels, secondary text, list rows */
@@ -77,90 +80,35 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Theme variables -- dark (:root) is the literal pre-theming palette this
-   app always had, unchanged in value, just moved from hardcoded hex/
-   Tailwind classes into named roles. :root[data-theme="light"] (see
-   ThemeContext.jsx, which sets this attribute on <html>) overrides every
-   one of them. Components reference the role (e.g. text-[var(--text-
-   primary)]), never a hardcoded shade, so nothing needs a `dark:` variant
-   duplicated everywhere. gradient-accent/modal-backdrop/notification-dot
-   are deliberately NOT here -- fixed-purpose colors, not theme-dependent,
-   see the plan this shipped from. */
+/* "Two of you" design system (2026-10-23): the colours live in
+   design-system/tokens.css (copied from Couple_finance_app/design-system,
+   which is the source; dark first, light when the device prefers it). The
+   older role names are aliases onto those tokens. */
 :root {
-  --bg-from: #14141f;
-  --bg-to: #08080c;
-  --bg-solid: #08080c;
-
-  --text-primary: #f1f5f9;
-  --text-secondary: #d6daf0;
-  --text-muted: #b1b7d8;
-  --text-faint: #9aa3c7;
-
-  --surface: #1e293b;
-  --surface-alt: #334155;
-  --surface-border: #334155;
-  --surface-border-subtle: #1e293b;
-
-  --glass-card-bg: rgba(30, 30, 40, 0.55);
-  --glass-card-border: rgba(255, 255, 255, 0.08);
-  --glass-panel-bg: rgba(20, 20, 28, 0.85);
-  --glass-panel-border: rgba(255, 255, 255, 0.1);
-  --hairline: rgba(255, 255, 255, 0.08);
-  /* ProgressRing's empty track -- a step brighter than --hairline so a 6px
-     stroke actually reads as "the track", not just a border-width smudge. */
-  --ring-track: rgba(255, 255, 255, 0.14);
-
-  --warn-bg: rgba(120, 53, 15, 0.4);
-  --success-bg: rgba(6, 78, 59, 0.4);
-  --info-bg: rgba(8, 51, 68, 0.3);
-  --danger-bg: rgba(127, 29, 29, 0.35);
-  --warn-text: #fbbf24;
-  --danger-text: #f87171;
-  --success-text: #34d399;
-  --info-text: #22d3ee;
-}
-
-:root[data-theme="light"] {
-  /* Off-white, not pure white -- a flat #ffffff top-of-gradient read as
-     too bright on a real screen. Rebased one/two steps down the slate
-     scale; glass-card/panel backgrounds follow so they don't pop brighter
-     than the page behind them. */
-  --bg-from: #f8fafc;
-  --bg-to: #e2e8f0;
-  --bg-solid: #f1f5f9;
-
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  /* Both re-picked for real WCAG AA contrast against this theme's light
-     backgrounds (measured, not guessed) -- the original slate-500/slate-400
-     values only cleared ~4.35:1 and ~2.34:1 respectively, well under the
-     4.5:1 minimum for normal text, and these two roles carry real content
-     (due dates, bill sublabels, help copy) on nearly every screen, not just
-     decoration. --text-muted now ~6.9:1, --text-faint ~5.7:1 -- still a
-     visibly lighter step than --text-muted, both comfortably over 4.5:1. */
-  --text-muted: #475569;
-  --text-faint: #56617a;
-
-  --surface: #f1f5f9;
-  --surface-alt: #e2e8f0;
-  --surface-border: #e2e8f0;
-  --surface-border-subtle: #f1f5f9;
-
-  --glass-card-bg: rgba(248, 250, 252, 0.65);
-  --glass-card-border: rgba(15, 23, 42, 0.08);
-  --glass-panel-bg: rgba(248, 250, 252, 0.85);
-  --glass-panel-border: rgba(15, 23, 42, 0.1);
-  --hairline: rgba(15, 23, 42, 0.08);
-  --ring-track: rgba(15, 23, 42, 0.12);
-
-  --warn-bg: rgba(254, 243, 199, 0.7);
-  --success-bg: rgba(209, 250, 229, 0.7);
-  --info-bg: rgba(207, 250, 254, 0.6);
-  --danger-bg: rgba(254, 226, 226, 0.75);
-  --warn-text: #b45309;
-  --danger-text: #dc2626;
-  --success-text: #059669;
-  --info-text: #0891b2;
+  --bg-from: var(--ground);
+  --bg-to: var(--ground);
+  --bg-solid: var(--ground);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink);
+  --text-muted: var(--ink-muted);
+  --text-faint: var(--ink-faint);
+  --surface-alt: var(--surface-soft);
+  --surface-border: var(--line-strong);
+  --surface-border-subtle: var(--line);
+  --glass-card-bg: var(--surface);
+  --glass-card-border: var(--line);
+  --glass-panel-bg: var(--surface);
+  --glass-panel-border: var(--line);
+  --hairline: var(--line);
+  --ring-track: var(--surface-soft);
+  --warn-bg: var(--warning-soft);
+  --success-bg: var(--success-soft);
+  --info-bg: var(--teal-soft);
+  --danger-bg: var(--danger-soft);
+  --warn-text: var(--warning);
+  --danger-text: var(--danger);
+  --success-text: var(--success);
+  --info-text: var(--teal-ink);
 }
 
 /* iOS rubber-band overscroll reveals whatever's behind the document --
@@ -180,9 +128,10 @@ body {
      heavy on a dark background at these sizes. */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: radial-gradient(ellipse at top, var(--bg-from) 0%, var(--bg-to) 70%);
-  background-attachment: fixed;
-  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  background: var(--ground);
+  color: var(--ink);
   -webkit-tap-highlight-color: transparent;
   /* Contains scroll chaining and the browser's own overscroll effects so
      PullToRefresh.jsx's gesture (and the header refresh button) are the
@@ -191,30 +140,11 @@ body {
   overscroll-behavior-y: contain;
 }
 
-/* Color concentrated in a few "hero" elements instead -- .glass-card/
-   .glass-panel are neutral glass (no color tint) for everything else;
-   .gradient-accent is the one shared blue->purple accent used consistently
-   everywhere something used to be flat cyan (primary buttons, active
-   toggle states, one hero card, ring strokes) -- tune the three stops here
-   once, not in N places. Deliberately the same in both themes. */
+/* Old glass/gradient classes, kept by name: plain surfaces and solid teal now. */
 @layer components {
-  .glass-card {
-    background: var(--glass-card-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-card-border);
-    border-radius: 1.25rem;
-  }
-  .glass-panel {
-    background: var(--glass-panel-bg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-panel-border);
-    border-radius: 1.5rem;
-  }
-  .gradient-accent {
-    background-image: linear-gradient(135deg, #38bdf8 0%, #6366f1 55%, #9333ea 100%);
-  }
+  .glass-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .glass-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .gradient-accent { background-color: var(--teal); color: var(--on-teal); }
 }
 
 /* iOS Safari auto-zooms the viewport when a focused form field's
@@ -244,7 +174,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   border-radius: 9999px;
-  background: #22d3ee;
+  background: var(--teal);
   cursor: pointer;
 }
 input[type="range"]::-moz-range-thumb {
@@ -252,6 +182,6 @@ input[type="range"]::-moz-range-thumb {
   height: 20px;
   border: none;
   border-radius: 9999px;
-  background: #22d3ee;
+  background: var(--teal);
   cursor: pointer;
 }

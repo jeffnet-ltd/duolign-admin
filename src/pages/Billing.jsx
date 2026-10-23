@@ -49,16 +49,16 @@ export default function Billing() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <Card title={`Money taken (${days} days)`} action={<ExtLink href="https://dashboard.stripe.com/payments">Stripe</ExtLink>}>
           {stripe?.series ? (
-            <Bars series={stripe.series.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['#34d399']} height={110} format={(v) => fmtMoney(v)} />
+            <Bars series={stripe.series.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['var(--chart-3)']} height={110} format={(v) => fmtMoney(v)} />
           ) : <p className="text-sm text-[var(--text-muted)]">{stripe?.error || 'Stripe isn’t connected on the server (STRIPE_API_KEY).'}</p>}
         </Card>
         {s && (
           <Card title="Voucher redemptions (30 days)">
-            <Bars series={s.redemptions_trend.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['#9333ea']} height={110} />
+            <Bars series={s.redemptions_trend.map((d) => ({ label: dayLabel(d.date), value: d.value }))} colors={['var(--chart-2)']} height={110} />
           </Card>
         )}
         {!data.mrr.error && days > 7 && (
-          <AdminMetricChart title={`MRR (${days} days)`} color="#38bdf8" value={fmtMoney(data.mrr.current)} changePct={data.mrr.change_pct} series={data.mrr.series} />
+          <AdminMetricChart title={`MRR (${days} days)`} color="var(--chart-1)" value={fmtMoney(data.mrr.current)} changePct={data.mrr.change_pct} series={data.mrr.series} />
         )}
       </div>
 
