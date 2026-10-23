@@ -1,5 +1,6 @@
 import { AdminProvider, useAdmin } from './context/AdminContext'
 import Shell, { useRoute } from './components/Shell'
+import ThemeToggle from './components/ThemeToggle'
 import LoginForm from './pages/Login'
 import Overview from './pages/Overview'
 import Customers from './pages/Customers'
@@ -20,7 +21,14 @@ const PAGE_COMPONENTS = {
 function Routed() {
   const { isAuthenticated } = useAdmin()
   const route = useRoute()
-  if (!isAuthenticated) return <LoginForm />
+  if (!isAuthenticated) {
+    return (
+      <>
+        <div className="flex justify-end px-4 pt-4"><ThemeToggle /></div>
+        <LoginForm />
+      </>
+    )
+  }
   const Page = PAGE_COMPONENTS[route]
   return (
     <Shell route={route}>
