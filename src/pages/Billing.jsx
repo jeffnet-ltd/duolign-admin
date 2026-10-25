@@ -3,7 +3,6 @@ import { api } from '../api'
 import AdminMetricChart from '../components/AdminMetricChart'
 import { Bars, dayLabel } from '../components/Charts'
 import Loading from '../components/Loading'
-import PartnersSection from '../components/PartnersSection'
 import {
   Card, ErrorNote, ExtLink, PageHeader, Segmented, StatTile, Table, fmtDate, fmtMoney, fmtNum, useAdminData, useSession,
 } from '../components/ui'
@@ -92,7 +91,6 @@ export default function Billing() {
         </Card>
       )}
 
-      <Card><PartnersSection {...session} /></Card>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <Card><HouseholdTiersSection {...session} /></Card>
         <Card><EntitlementsSection {...session} /></Card>
