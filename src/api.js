@@ -127,5 +127,44 @@ export const api = {
       method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ status }),
     }),
     logs: (token, lines) => request(`/admin/logs${lines ? `?lines=${lines}` : ''}`, { headers: { Authorization: `Bearer ${token}` } }),
+    // Partner outreach (Couple_finance_app server/outreach_service.py), 2026-10-25.
+    outreach: (token) => request('/admin/outreach', { headers: { Authorization: `Bearer ${token}` } }),
+    addLead: (token, body) => request('/admin/outreach/leads', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
+    }),
+    updateLead: (token, id, body) => request(`/admin/outreach/leads/${encodeURIComponent(id)}`, {
+      method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
+    }),
+    deleteLead: (token, id) => request(`/admin/outreach/leads/${encodeURIComponent(id)}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+    }),
+    enrolLead: (token, id) => request(`/admin/outreach/leads/${encodeURIComponent(id)}/enrol`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    }),
+    updateTemplate: (token, category, step, body) => request(`/admin/outreach/templates/${encodeURIComponent(category)}/${step}`, {
+      method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
+    }),
+    updateOutreachSettings: (token, body) => request('/admin/outreach/settings', {
+      method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
+    }),
+    importOutreach: (token, file) => {
+      const form = new FormData()
+      form.append('file', file)
+      return request('/admin/outreach/import', { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
+    },
   },
+}
+
+// The lead list as a workbook (request() only handles JSON).
+export async function downloadOutreachExport(token) {
+  const resp = await fetch(`${BASE}/admin/outreach/export`, { headers: { Authorization: `Bearer ${token}` } })
+  if (!resp.ok) throw new Error(friendlyRequestFailedMessage(resp.status))
+  const url = URL.createObjectURL(await resp.blob())
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `duolign-outreach-${new Date().toISOString().slice(0, 10)}.xlsx`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 2000)
 }
