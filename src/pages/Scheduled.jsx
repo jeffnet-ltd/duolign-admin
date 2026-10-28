@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { ExternalLink } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { ExternalLink, Play, Volume2, VolumeX, X } from 'lucide-react'
 import { api } from '../api'
 import Loading from '../components/Loading'
 import {
@@ -89,6 +90,7 @@ export default function Scheduled() {
 function PostCard({ post: p, session, reload }) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null)
+  const [viewing, setViewing] = useState(null) // slide index open full screen
   const [tone, label] = STATUS[p.status] || ['unconfigured', p.status]
   const reel = p.kind === 'reel'
 
@@ -118,11 +120,18 @@ function PostCard({ post: p, session, reload }) {
 
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
         {p.media.map((m, i) => (
-          <video key={m.url} src={m.url} controls playsInline preload="metadata"
-            aria-label={reel ? 'The reel' : `Slide ${i + 1}`}
-            className={`shrink-0 rounded-lg bg-[var(--surface-alt)] ${reel ? 'w-44 aspect-[9/16]' : 'w-40 aspect-[4/5]'}`} />
+          <button key={m.url} type="button" onClick={() => setViewing(i)}
+            aria-label={reel ? 'Watch the reel full screen' : `Watch slide ${i + 1} of ${p.media.length} full screen`}
+            className={`relative shrink-0 overflow-hidden rounded-lg bg-[var(--surface-alt)] ${reel ? 'w-44 aspect-[9/16]' : 'w-40 aspect-[4/5]'}`}>
+            {/* #t=0.1 shows the first frame as a still on iOS, which won't paint a paused video otherwise */}
+            <video src={`${m.url}#t=0.1`} muted playsInline preload="metadata" tabIndex={-1} className="pointer-events-none h-full w-full object-cover" />
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white"><Play size={18} fill="currentColor" /></span>
+            </span>
+          </button>
         ))}
       </div>
+      {viewing != null && <Viewer media={p.media} start={viewing} reel={reel} title={when(p.scheduled_at)} onClose={() => setViewing(null)} />}
 
       <details>
         <summary className="cursor-pointer text-xs font-medium text-[var(--text-secondary)]">Caption</summary>
@@ -146,3 +155,90 @@ function PostCard({ post: p, session, reload }) {
     </Card>
   )
 }
+
+
+// Full-screen viewer: swipe (or arrow keys) between a carousel's slides
+// without leaving full screen. The slide in view plays from the start with
+// sound; the rest pause. Escape or the close button returns to the page.
+function Viewer({ media, start, reel, title, onClose }) {
+  const track = useRef(null)
+  const vids = useRef([])
+  const [current, setCurrent] = useState(start)
+  const [muted, setMuted] = useState(false)
+  const close = useRef(onClose)
+  close.current = onClose
+  const showing = useRef(start) // the slide in view now, for play() promises that settle late
+
+  // Once, on open: lock the page behind, jump to the tapped slide, keys.
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const el = track.current
+    if (el) el.scrollLeft = start * el.clientWidth
+    const onKey = (e) => {
+      if (e.key === 'Escape') close.current()
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault()
+        el?.scrollBy({ left: (e.key === 'ArrowRight' ? 1 : -1) * el.clientWidth, behavior: 'smooth' })
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    showing.current = current
+    vids.current.forEach((v, i) => {
+      if (!v) return
+      if (i === current) {
+        v.currentTime = 0
+        v.muted = muted
+        // If the browser refuses sound, play silently, but only if this is still the slide in view.
+        v.play().catch(() => { if (showing.current === i) { v.muted = true; v.play().catch(() => {}) } })
+      } else {
+        v.pause()
+      }
+    })
+  }, [current, muted])
+
+  const onScroll = () => {
+    const el = track.current
+    if (!el) return
+    const i = Math.round(el.scrollLeft / el.clientWidth)
+    if (i !== current) setCurrent(i)
+  }
+
+  // Rendered on <body>, outside the card, so nothing on the page can clip or offset it.
+  return createPortal(
+    <div role="dialog" aria-modal="true" aria-label={`${title}, ${reel ? 'reel' : 'carousel'}`}
+      className="fixed inset-0 z-[100] flex flex-col bg-black text-white"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
+        <span className="text-sm font-medium tabular-nums">{reel ? title : `${current + 1} / ${media.length}`}</span>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => setMuted((m) => !m)} aria-label={muted ? 'Sound on' : 'Sound off'}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15">{muted ? <VolumeX size={18} /> : <Volume2 size={18} />}</button>
+          <button type="button" onClick={onClose} aria-label="Close"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15"><X size={20} /></button>
+        </div>
+      </div>
+      <div ref={track} onScroll={onScroll}
+        className="flex flex-1 snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {media.map((m, i) => (
+          <div key={m.url} className="flex h-full w-full shrink-0 snap-center items-center justify-center px-2 pb-2">
+            <video ref={(el) => { vids.current[i] = el }} src={m.url} loop playsInline preload={Math.abs(i - start) <= 1 ? 'auto' : 'metadata'}
+              aria-label={reel ? 'The reel' : `Slide ${i + 1}`} className="max-h-full max-w-full rounded-lg object-contain" />
+          </div>
+        ))}
+      </div>
+      {!reel && (
+        <div className="flex justify-center gap-1.5 pb-3" aria-hidden="true">
+          {media.map((m, i) => <span key={m.url} className={`h-1.5 w-1.5 rounded-full ${i === current ? 'bg-white' : 'bg-white/35'}`} />)}
+        </div>
+      )}
+    </div>,
+    document.body,
+  )
+}
+
