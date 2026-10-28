@@ -74,12 +74,12 @@ export function PageHeader({ title, subtitle, updatedAt, loading, onRefresh, chi
         <h1 className="text-xl font-semibold text-[var(--text-primary)]">{title}</h1>
         {subtitle && <p className="text-sm text-[var(--text-muted)] mt-0.5">{subtitle}</p>}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 max-w-full min-w-0">
         {children}
         {onRefresh && (
           <button
             type="button" onClick={onRefresh} disabled={loading}
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--surface-border)] px-2.5 py-1.5 text-xs text-[var(--text-muted)] disabled:opacity-60"
+            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-[var(--surface-border)] px-2.5 py-1.5 text-xs text-[var(--text-muted)] disabled:opacity-60"
           >
             <RefreshCw size={13} strokeWidth={2} className={loading ? 'animate-spin' : ''} />
             {updatedAt ? `Updated ${updatedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : 'Refresh'}
@@ -171,18 +171,22 @@ export function ExtLink({ href, children }) {
 
 export function Segmented({ options, value, onChange }) {
   return (
-    <div className="flex items-center gap-0.5 rounded-lg bg-[var(--surface-alt)] p-0.5">
+    // Scrolls sideways inside its own background on a narrow screen, so the
+    // background always runs the full length of the options.
+    <div className="max-w-full overflow-x-auto rounded-lg bg-[var(--surface-alt)]">
+      <div className="flex w-max items-center gap-0.5 p-0.5">
       {options.map((opt) => {
         const [v, label] = Array.isArray(opt) ? opt : [opt, opt]
         return (
           <button
             key={v} type="button" onClick={() => onChange(v)}
-            className={`rounded-md px-2 py-1 text-xs font-medium transition-colors ${value === v ? 'bg-[var(--surface)] text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}
+            className={`shrink-0 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium transition-colors ${value === v ? 'bg-[var(--surface)] text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}
           >
             {label}
           </button>
         )
       })}
+      </div>
     </div>
   )
 }

@@ -131,12 +131,10 @@ function LeadsTab({ data, session, reload }) {
   return (
     <Card>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="max-w-full overflow-x-auto">
-          <Segmented
-            options={[['all', 'All'], ...Object.keys(SHORT_CATEGORY).map((k) => [k, SHORT_CATEGORY[k]])]}
-            value={category} onChange={setCategory}
-          />
-        </div>
+        <Segmented
+          options={[['all', 'All'], ...Object.keys(SHORT_CATEGORY).map((k) => [k, SHORT_CATEGORY[k]])]}
+          value={category} onChange={setCategory}
+        />
         <select value={status} onChange={(e) => setStatus(e.target.value)} className={FIELD} aria-label="Filter by status">
           <option value="all">Any status</option>
           {data.statuses.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
