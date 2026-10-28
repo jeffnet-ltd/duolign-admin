@@ -62,8 +62,10 @@ export default function Scheduled() {
         <StatTile label="Scheduled" value={fmtNum(data.posts.filter((p) => p.status === 'scheduled').length)} />
         <StatTile label="Published (30 days)" value={fmtNum(done.length)} />
         <StatTile label="Instagram" value={data.instagram.connected ? 'Connected' : 'Not connected'}
-          sub={data.instagram.token_refreshed_at ? `Token renewed ${timeAgo(data.instagram.token_refreshed_at)}` : 'Set INSTAGRAM_ACCOUNT_ID and INSTAGRAM_ACCESS_TOKEN'}
-          tone={data.instagram.connected ? 'ok' : 'warn'} />
+          sub={!data.instagram.connected ? 'Set INSTAGRAM_ACCOUNT_ID and INSTAGRAM_ACCESS_TOKEN'
+            : data.instagram.renews_automatically === false ? "Token won't renew itself: add META_APP_ID and META_APP_SECRET to the worker"
+              : data.instagram.token_refreshed_at ? `Token renewed ${timeAgo(data.instagram.token_refreshed_at)}` : 'Connected'}
+          tone={!data.instagram.connected || data.instagram.renews_automatically === false ? 'warn' : 'ok'} />
       </div>
       {attention.length > 0 && (
         <p className="text-sm text-[var(--warn-text)]">
