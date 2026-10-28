@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  Activity, AlertOctagon, CreditCard, LayoutDashboard, LogOut, Megaphone, Server, Settings, Users,
+  Activity, AlertOctagon, CalendarClock, CreditCard, LayoutDashboard, LogOut, Megaphone, Server, Settings, Users,
 } from 'lucide-react'
 import { useAdmin } from '../context/AdminContext'
 import { api } from '../api'
@@ -12,6 +12,7 @@ export const PAGES = [
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'billing', label: 'Billing', icon: CreditCard },
   { id: 'outreach', label: 'Outreach', icon: Megaphone },
+  { id: 'scheduled', label: 'Scheduled', icon: CalendarClock },
   { id: 'app', label: 'App health', icon: Activity },
   { id: 'services', label: 'Services', icon: Server },
   { id: 'errors', label: 'Errors', icon: AlertOctagon },

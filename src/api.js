@@ -147,6 +147,17 @@ export const api = {
     updateOutreachSettings: (token, body) => request('/admin/outreach/settings', {
       method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(body),
     }),
+    // Scheduled social posts (Couple_finance_app server/social_service.py), 2026-10-28.
+    social: (token) => request('/admin/social', { headers: { Authorization: `Bearer ${token}` } }),
+    pullSocial: (token, id) => request(`/admin/social/${encodeURIComponent(id)}/pull`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    }),
+    restoreSocial: (token, id) => request(`/admin/social/${encodeURIComponent(id)}/restore`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    }),
+    postSocialNow: (token, id) => request(`/admin/social/${encodeURIComponent(id)}/post-now`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    }),
     importOutreach: (token, file) => {
       const form = new FormData()
       form.append('file', file)
