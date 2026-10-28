@@ -6,6 +6,7 @@ import Overview from './pages/Overview'
 import Customers from './pages/Customers'
 import Billing from './pages/Billing'
 import Outreach from './pages/Outreach'
+import Scheduled from './pages/Scheduled'
 import AppHealth from './pages/AppHealth'
 import Services from './pages/Services'
 import Errors from './pages/Errors'
@@ -15,7 +16,7 @@ import SettingsPage from './pages/Settings'
 // gate is server-side on every /api/admin/* route (require_admin); the
 // login form here only stops a visitor seeing raw 401s.
 const PAGE_COMPONENTS = {
-  overview: Overview, customers: Customers, billing: Billing, outreach: Outreach, app: AppHealth,
+  overview: Overview, customers: Customers, billing: Billing, outreach: Outreach, scheduled: Scheduled, app: AppHealth,
   services: Services, errors: Errors, settings: SettingsPage,
 }
 
