@@ -108,6 +108,13 @@ export const api = {
     revokeVoucher: (token, code) => request(`/admin/vouchers/${encodeURIComponent(code)}/revoke`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}` },
     }),
+    // Partner dashboard, self-serve (2026-10-30).
+    changePartnerEmail: (token, partnerId, email) => request(`/admin/partners/${encodeURIComponent(partnerId)}/email`, {
+      method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ email }),
+    }),
+    cancelUnusedVouchers: (token, batchId) => request(`/admin/voucher-batches/${encodeURIComponent(batchId)}/cancel-unused`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    }),
     // Multi-page dashboard, 2026-10-22.
     overview: (token) => request('/admin/overview', { headers: { Authorization: `Bearer ${token}` } }),
     services: (token, refresh = false) => request(`/admin/services${refresh ? '?refresh=true' : ''}`, { headers: { Authorization: `Bearer ${token}` } }),
