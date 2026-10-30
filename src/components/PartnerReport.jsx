@@ -11,7 +11,7 @@ const pct = (n, d) => (d ? `${Math.round((n / d) * 100)}%` : '—')
 
 function Figures({ r }) {
   return [
-    ['Sent', r.vouchers_sent],
+    ['Handed out', r.vouchers_sent],
     ['Redeemed', `${r.redeemed} (${pct(r.redeemed, r.vouchers_sent)})`],
     ['Median days to redeem', r.median_days_to_redeem ?? '—'],
     ['Active after 30 days', r.retention_eligible ? `${r.active_after_30_days} of ${r.retention_eligible}` : '—'],

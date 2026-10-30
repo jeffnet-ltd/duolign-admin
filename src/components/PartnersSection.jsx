@@ -6,8 +6,8 @@ import PartnerReport from './PartnerReport'
 
 // B2B voucher partnership programme, stage 2 (Couple_finance_app
 // docs/VOUCHER_PROGRAMME_PLAN.md). Duolign enrols each partner business
-// here -- enrolment issues its 3 complimentary vouchers (3 months of
-// Premium each, redeemable for a year). The 90/180-day deadlines only
+// here -- enrolment issues its 5 complimentary vouchers (3 months of
+// Premium each, redeemable for a year). The 180-day discount deadline only
 // gate the first-pack discount (stage 5); extending them never touches
 // the vouchers. Every write goes through require_admin and is audit-logged
 // server-side.
@@ -134,7 +134,7 @@ function EnrolForm({ token, categories, disabled, onEnrolled, onSessionError }) 
       {enrolled && (
         <div className="rounded-lg border border-[var(--success-text)]/40 bg-[var(--success-bg)] p-3 space-y-1.5">
           <p className="text-xs font-medium text-[var(--success-text)]">
-            {enrolled.name} is enrolled. Their 3 complimentary vouchers:
+            {enrolled.name} is enrolled. Their 5 complimentary vouchers:
           </p>
           {enrolled.codes.map((c) => (
             <div key={c} className="flex items-center justify-between gap-2">
@@ -143,7 +143,7 @@ function EnrolForm({ token, categories, disabled, onEnrolled, onSessionError }) 
             </div>
           ))}
           <p className="text-xs text-[var(--text-faint)]">
-            The business sends them to clients from its partner page on duolign.co.uk.
+            The business hands them out from its partner dashboard on duolign.co.uk.
           </p>
           <button type="button" onClick={() => setEnrolled(null)} className="text-xs text-[var(--text-muted)] underline">Dismiss</button>
         </div>
@@ -168,7 +168,7 @@ function EnrolForm({ token, categories, disabled, onEnrolled, onSessionError }) 
           </div>
           <textarea rows={2} placeholder="Notes (optional)" value={form.notes} onChange={set('notes')} className={INPUT} />
           <p className="text-xs text-[var(--text-faint)]">
-            Issues 3 complimentary vouchers: 3 months of Premium each, redeemable for a year.
+            Issues 5 complimentary vouchers: 3 months of Premium each, redeemable for a year, plus a 20% first-pack code (180 days).
           </p>
           {error && <p className="text-xs text-[var(--danger-text)]">{error}</p>}
           <div className="flex gap-2">
@@ -183,9 +183,12 @@ function EnrolForm({ token, categories, disabled, onEnrolled, onSessionError }) 
 
 function PartnerCard({ token, partner, onChanged, onSessionError }) {
   const [editing, setEditing] = useState(false)
-  const [dist, setDist] = useState(toInput(partner.distribution_deadline))
   const [disc, setDisc] = useState(toInput(partner.discount_deadline))
+  const [emailEdit, setEmailEdit] = useState(null)
   const [error, setError] = useState(null)
+  const selfServe = partner.source === 'self_serve'
+  const packs = boughtPacks(partner.vouchers)
+  const flagged = partner.vouchers.filter((v) => v.self_redeem_flag).length
 
   async function run(fn) {
     setError(null)
@@ -199,7 +202,7 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
   }
 
   const saveDeadlines = () => run(async () => {
-    await api.admin.updatePartner(token, partner.id, { distribution_deadline: dist || null, discount_deadline: disc || null })
+    await api.admin.updatePartner(token, partner.id, { discount_deadline: disc || null })
     setEditing(false)
   })
   const setStatus = (status) => run(() => api.admin.updatePartner(token, partner.id, { status }))
@@ -207,16 +210,38 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
     if (!window.confirm(`Revoke ${code}? It can never be redeemed after this.`)) return
     run(() => api.admin.revokeVoucher(token, code))
   }
+  const saveEmail = () => run(async () => {
+    await api.admin.changePartnerEmail(token, partner.id, emailEdit)
+    setEmailEdit(null)
+  })
+  const cancelUnused = (pack) => {
+    if (!window.confirm(`Cancel the ${pack.unused} unused vouchers in this pack for a refund?\n\nThis can't be undone. Refund the money in Stripe afterwards.`)) return
+    run(async () => {
+      const r = await api.admin.cancelUnusedVouchers(token, pack.id)
+      window.alert(`${r.cancelled} of ${r.of} vouchers cancelled. Now refund ${r.cancelled} vouchers' worth in Stripe.`)
+    })
+  }
 
   return (
     <div className="rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] p-3 space-y-2">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-sm font-medium text-[var(--text-primary)] truncate">{partner.business_name}</p>
-          <p className="text-xs text-[var(--text-faint)] truncate">{partner.category_label}</p>
           <p className="text-xs text-[var(--text-faint)] truncate">
-            {partner.email}{partner.contact_name ? ` · ${partner.contact_name}` : ''}{partner.postcode ? ` · ${partner.postcode}` : ''}
+            {partner.category_label} · {selfServe ? 'Set up own dashboard (packs only)' : 'Enrolled by us'}
           </p>
+          {partner.details_erased ? (
+            <p className="text-xs text-[var(--text-faint)]">Left and asked us to delete their details</p>
+          ) : (
+            <p className="text-xs text-[var(--text-faint)] truncate">
+              {partner.email}{partner.contact_name ? ` · ${partner.contact_name}` : ''}{partner.postcode ? ` · ${partner.postcode}` : ''}
+              {partner.team_size ? ` · +${partner.team_size} team` : ''}
+              {' '}
+              <button type="button" onClick={() => setEmailEdit(emailEdit === null ? partner.email : null)} className="text-[var(--info-text)] underline">
+                {emailEdit === null ? 'change email' : 'cancel'}
+              </button>
+            </p>
+          )}
         </div>
         <select
           aria-label="Status" value={partner.status} onChange={(e) => setStatus(e.target.value)}
@@ -228,41 +253,72 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
         </select>
       </div>
 
+      {emailEdit !== null && (
+        <div className="flex gap-2">
+          <input type="email" value={emailEdit} onChange={(e) => setEmailEdit(e.target.value)} aria-label="New main contact email" className={INPUT} />
+          <button type="button" onClick={saveEmail} className={`${PRIMARY} shrink-0`}>Save</button>
+        </div>
+      )}
+
+      {flagged > 0 && (
+        <p className="text-xs text-[var(--warn-text)]">
+          {flagged === 1 ? '1 voucher was' : `${flagged} vouchers were`} redeemed from the business's own email domain or team. Worth a look.
+        </p>
+      )}
+
       <div className="text-xs text-[var(--text-muted)] space-y-0.5">
-        <p>
-          Enrolled {fmtDate(partner.enrolled_at)} · Complimentary sent {partner.complimentary_sent}/{partner.complimentary_total}, redeemed {partner.complimentary_redeemed}
-        </p>
-        <p>
-          Send all 3 by {fmtDate(partner.distribution_deadline)} · Discount usable until {fmtDate(partner.discount_deadline)}
-          {' '}
-          <button type="button" onClick={() => setEditing((e) => !e)} className="text-[var(--info-text)] underline">
-            {editing ? 'cancel' : 'extend'}
-          </button>
-        </p>
+        {selfServe ? (
+          <p>Dashboard set up {fmtDate(partner.enrolled_at)}</p>
+        ) : (
+          <>
+            <p>
+              Enrolled {fmtDate(partner.enrolled_at)} · Complimentary handed out {partner.complimentary_sent}/{partner.complimentary_total}, redeemed {partner.complimentary_redeemed}
+            </p>
+            <p>
+              Discount usable until {fmtDate(partner.discount_deadline)}
+              {' '}
+              <button type="button" onClick={() => setEditing((e) => !e)} className="text-[var(--info-text)] underline">
+                {editing ? 'cancel' : 'extend'}
+              </button>
+            </p>
+          </>
+        )}
       </div>
 
       {editing && (
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <label className="text-xs text-[var(--text-faint)] space-y-1">
-              <span>Send all 3 by</span>
-              <input type="date" value={dist} onChange={(e) => setDist(e.target.value)} className={INPUT} />
-            </label>
-            <label className="text-xs text-[var(--text-faint)] space-y-1">
               <span>Discount until</span>
               <input type="date" value={disc} onChange={(e) => setDisc(e.target.value)} className={INPUT} />
             </label>
           </div>
-          <button type="button" onClick={saveDeadlines} className={PRIMARY}>Save deadlines</button>
+          <button type="button" onClick={saveDeadlines} className={PRIMARY}>Save deadline</button>
         </div>
       )}
 
-      <p className="text-xs text-[var(--text-muted)]">
-        First-pack discount:{' '}
-        {partner.discount_code
-          ? <><span className="font-mono text-[var(--text-primary)]">{partner.discount_code}</span>{partner.discount_used ? ' · used' : ' · not used yet'}</>
-          : 'not unlocked yet'}
-      </p>
+      {!selfServe && (
+        <p className="text-xs text-[var(--text-muted)]">
+          First-pack discount:{' '}
+          {partner.discount_code
+            ? <><span className="font-mono text-[var(--text-primary)]">{partner.discount_code}</span>{partner.discount_used ? ' · used' : ' · not used yet'}</>
+            : 'created on their first visit to the partner dashboard'}
+        </p>
+      )}
+      {packs.length > 0 && (
+        <div className="space-y-1">
+          {packs.map((pk) => (
+            <div key={pk.id} className="flex items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
+              <span>Pack of {pk.total} bought {fmtDate(pk.created_at)} · {pk.unused} unused</span>
+              {withinRefund(pk.created_at) && pk.unused > 0 && (
+                <button type="button" onClick={() => cancelUnused(pk)} className="shrink-0 text-[var(--danger-text)] underline">
+                  Cancel unused (refund)
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
       {partner.notes && <p className="text-xs text-[var(--text-faint)] whitespace-pre-line">{partner.notes}</p>}
 
       <div className="divide-y divide-[var(--surface-border)] border-t border-[var(--surface-border)]">
@@ -281,10 +337,17 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
                   : v.state[0].toUpperCase() + v.state.slice(1)}
               {v.kind === 'purchased' ? ` · ${v.duration_months}-month pack` : ''}
             </p>
-            {v.sent_to && (
+            {v.sent_to ? (
               <p className="text-xs text-[var(--text-faint)] break-all">
-                Sent to {v.sent_to} on {fmtDate(v.sent_at)}
+                Emailed to {v.sent_to} on {fmtDate(v.sent_at)}
               </p>
+            ) : v.handed_out_at && (
+              <p className="text-xs text-[var(--text-faint)]">
+                {HANDED[v.handed_out_via] || 'Handed out'} on {fmtDate(v.handed_out_at)}
+              </p>
+            )}
+            {v.self_redeem_flag && (
+              <p className="text-xs text-[var(--warn-text)]">Redeemed from the business's own domain or team.</p>
             )}
             {v.sent_to_other_businesses_too && (
               <p className="text-xs text-[var(--warn-text)]">This address has also had a voucher from another business.</p>
@@ -296,6 +359,23 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
     </div>
   )
 }
+
+const HANDED = { link: 'Link shared', qr: 'QR code shown', email: 'Emailed', print: 'Printed' }
+const REFUND_DAYS = 14
+
+// Bought packs, newest first, with what's left unused in each (refunds).
+function boughtPacks(vouchers) {
+  const packs = new Map()
+  for (const v of vouchers) {
+    if (v.kind !== 'purchased') continue
+    const p = packs.get(v.batch_id) || { id: v.batch_id, created_at: v.batch_created_at, total: 0, unused: 0 }
+    p.total += 1
+    if (v.state === 'unused' && !v.handed_out_at && !v.sent_to) p.unused += 1
+    packs.set(v.batch_id, p)
+  }
+  return [...packs.values()].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
+}
+const withinRefund = (iso) => iso && Date.now() - new Date(iso).getTime() <= REFUND_DAYS * 86400000
 
 export default function PartnersSection({ token, onSessionError }) {
   const [data, setData] = useState(null)
