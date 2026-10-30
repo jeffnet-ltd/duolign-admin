@@ -223,7 +223,7 @@ function LeadsTab({ data, session, reload }) {
                       <button
                         type="button" className={PRIMARY} disabled={busy}
                         onClick={() => {
-                          if (window.confirm(`Enrol ${lead.business_name} as a partner business? This issues their 3 complimentary vouchers.`)) {
+                          if (window.confirm(`Enrol ${lead.business_name} as a partner business? This issues their 5 complimentary vouchers.`)) {
                             run(() => api.admin.enrolLead(session.token, lead.id), () => `${lead.business_name} enrolled. Their vouchers are on the Partners tab.`)
                           }
                         }}

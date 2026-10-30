@@ -6,8 +6,8 @@ import PartnerReport from './PartnerReport'
 
 // B2B voucher partnership programme, stage 2 (Couple_finance_app
 // docs/VOUCHER_PROGRAMME_PLAN.md). Duolign enrols each partner business
-// here -- enrolment issues its 3 complimentary vouchers (3 months of
-// Premium each, redeemable for a year). The 90/180-day deadlines only
+// here -- enrolment issues its 5 complimentary vouchers (3 months of
+// Premium each, redeemable for a year). The 180-day discount deadline only
 // gate the first-pack discount (stage 5); extending them never touches
 // the vouchers. Every write goes through require_admin and is audit-logged
 // server-side.
@@ -134,7 +134,7 @@ function EnrolForm({ token, categories, disabled, onEnrolled, onSessionError }) 
       {enrolled && (
         <div className="rounded-lg border border-[var(--success-text)]/40 bg-[var(--success-bg)] p-3 space-y-1.5">
           <p className="text-xs font-medium text-[var(--success-text)]">
-            {enrolled.name} is enrolled. Their 3 complimentary vouchers:
+            {enrolled.name} is enrolled. Their 5 complimentary vouchers:
           </p>
           {enrolled.codes.map((c) => (
             <div key={c} className="flex items-center justify-between gap-2">
@@ -168,7 +168,7 @@ function EnrolForm({ token, categories, disabled, onEnrolled, onSessionError }) 
           </div>
           <textarea rows={2} placeholder="Notes (optional)" value={form.notes} onChange={set('notes')} className={INPUT} />
           <p className="text-xs text-[var(--text-faint)]">
-            Issues 3 complimentary vouchers: 3 months of Premium each, redeemable for a year.
+            Issues 5 complimentary vouchers: 3 months of Premium each, redeemable for a year, plus a 20% first-pack code (180 days).
           </p>
           {error && <p className="text-xs text-[var(--danger-text)]">{error}</p>}
           <div className="flex gap-2">
@@ -183,7 +183,6 @@ function EnrolForm({ token, categories, disabled, onEnrolled, onSessionError }) 
 
 function PartnerCard({ token, partner, onChanged, onSessionError }) {
   const [editing, setEditing] = useState(false)
-  const [dist, setDist] = useState(toInput(partner.distribution_deadline))
   const [disc, setDisc] = useState(toInput(partner.discount_deadline))
   const [error, setError] = useState(null)
 
@@ -199,7 +198,7 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
   }
 
   const saveDeadlines = () => run(async () => {
-    await api.admin.updatePartner(token, partner.id, { distribution_deadline: dist || null, discount_deadline: disc || null })
+    await api.admin.updatePartner(token, partner.id, { discount_deadline: disc || null })
     setEditing(false)
   })
   const setStatus = (status) => run(() => api.admin.updatePartner(token, partner.id, { status }))
@@ -230,10 +229,10 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
 
       <div className="text-xs text-[var(--text-muted)] space-y-0.5">
         <p>
-          Enrolled {fmtDate(partner.enrolled_at)} · Complimentary sent {partner.complimentary_sent}/{partner.complimentary_total}, redeemed {partner.complimentary_redeemed}
+          Enrolled {fmtDate(partner.enrolled_at)} · Complimentary handed out {partner.complimentary_sent}/{partner.complimentary_total}, redeemed {partner.complimentary_redeemed}
         </p>
         <p>
-          Send all 3 by {fmtDate(partner.distribution_deadline)} · Discount usable until {fmtDate(partner.discount_deadline)}
+          Discount usable until {fmtDate(partner.discount_deadline)}
           {' '}
           <button type="button" onClick={() => setEditing((e) => !e)} className="text-[var(--info-text)] underline">
             {editing ? 'cancel' : 'extend'}
@@ -245,15 +244,11 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <label className="text-xs text-[var(--text-faint)] space-y-1">
-              <span>Send all 3 by</span>
-              <input type="date" value={dist} onChange={(e) => setDist(e.target.value)} className={INPUT} />
-            </label>
-            <label className="text-xs text-[var(--text-faint)] space-y-1">
               <span>Discount until</span>
               <input type="date" value={disc} onChange={(e) => setDisc(e.target.value)} className={INPUT} />
             </label>
           </div>
-          <button type="button" onClick={saveDeadlines} className={PRIMARY}>Save deadlines</button>
+          <button type="button" onClick={saveDeadlines} className={PRIMARY}>Save deadline</button>
         </div>
       )}
 
@@ -261,7 +256,7 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
         First-pack discount:{' '}
         {partner.discount_code
           ? <><span className="font-mono text-[var(--text-primary)]">{partner.discount_code}</span>{partner.discount_used ? ' · used' : ' · not used yet'}</>
-          : 'not unlocked yet'}
+          : 'created on their first visit to the partner dashboard'}
       </p>
       {partner.notes && <p className="text-xs text-[var(--text-faint)] whitespace-pre-line">{partner.notes}</p>}
 
@@ -281,9 +276,13 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
                   : v.state[0].toUpperCase() + v.state.slice(1)}
               {v.kind === 'purchased' ? ` · ${v.duration_months}-month pack` : ''}
             </p>
-            {v.sent_to && (
+            {v.sent_to ? (
               <p className="text-xs text-[var(--text-faint)] break-all">
-                Sent to {v.sent_to} on {fmtDate(v.sent_at)}
+                Emailed to {v.sent_to} on {fmtDate(v.sent_at)}
+              </p>
+            ) : v.handed_out_at && (
+              <p className="text-xs text-[var(--text-faint)]">
+                {HANDED[v.handed_out_via] || 'Handed out'} on {fmtDate(v.handed_out_at)}
               </p>
             )}
             {v.sent_to_other_businesses_too && (
@@ -296,6 +295,8 @@ function PartnerCard({ token, partner, onChanged, onSessionError }) {
     </div>
   )
 }
+
+const HANDED = { link: 'Link shared', qr: 'QR code shown', email: 'Emailed', print: 'Printed' }
 
 export default function PartnersSection({ token, onSessionError }) {
   const [data, setData] = useState(null)
