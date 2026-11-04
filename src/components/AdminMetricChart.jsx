@@ -1,5 +1,5 @@
 import { useId, useMemo } from 'react'
-import { TrendingDown, TrendingUp } from 'lucide-react'
+import { TrendingDown, TrendingUp } from '../design-system/icons'
 
 // Admin dashboard metrics (docs/ROADMAP.md's "Observability & admin
 // dashboard" section) -- a Stripe-dashboard-style card: a big headline

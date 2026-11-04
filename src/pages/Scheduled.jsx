@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ExternalLink, Play, Volume2, VolumeX, X } from 'lucide-react'
+import { ExternalLink, Play, Volume2, VolumeX, X } from '../design-system/icons'
 import { api } from '../api'
 import Loading from '../components/Loading'
 import {

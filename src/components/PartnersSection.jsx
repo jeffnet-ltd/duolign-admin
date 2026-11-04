@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check, Copy, Handshake } from 'lucide-react'
+import { Check, Copy, Handshake } from '../design-system/icons'
 import { api } from '../api'
 import Loading from './Loading'
 import PartnerReport from './PartnerReport'

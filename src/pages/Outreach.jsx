@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { AtSign, Download, ExternalLink, Plus, Trash2, Upload } from 'lucide-react'
+import { AtSign, Download, ExternalLink, Plus, Trash2, Upload } from '../design-system/icons'
 import { api, downloadOutreachExport } from '../api'
 import Loading from '../components/Loading'
 import PartnersSection from '../components/PartnersSection'
