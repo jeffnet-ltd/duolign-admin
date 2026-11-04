@@ -1,4 +1,4 @@
-import { BarChart3 } from 'lucide-react'
+import { BarChart3 } from '../design-system/icons'
 
 // Voucher programme stage 6 (Couple_finance_app docs/VOUCHER_PROGRAMME_PLAN.md):
 // how each partner business and each category is doing. Built server-side by

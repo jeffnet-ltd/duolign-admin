@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Moon, Sun } from 'lucide-react'
+import { Moon, Sun } from '../design-system/icons'
 
 // Light/dark choice, the same way the app and duolign.co.uk do it: follow
 // the device until a pick, then remember the pick. index.html applies a

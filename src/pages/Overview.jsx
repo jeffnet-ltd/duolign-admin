@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2 } from '../design-system/icons'
 import { api } from '../api'
 import AdminMetricChart from '../components/AdminMetricChart'
 import { Bars, dayLabel, hourLabel } from '../components/Charts'

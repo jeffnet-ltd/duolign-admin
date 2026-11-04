@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ExternalLink, RefreshCw } from 'lucide-react'
+import { ExternalLink, RefreshCw } from '../design-system/icons'
 import { useAdmin } from '../context/AdminContext'
 
 // Shared pieces for the multi-page dashboard (2026-10-22 rebuild).

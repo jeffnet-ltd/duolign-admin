@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft } from '../design-system/icons'
 import { api } from '../api'
 import { useAdmin } from '../context/AdminContext'
 import { Bars, Sparkline, dayLabel } from '../components/Charts'

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Activity, AlertOctagon, CalendarClock, CreditCard, LayoutDashboard, LogOut, Megaphone, Server, Settings, Users,
-} from 'lucide-react'
+} from '../design-system/icons'
 import { useAdmin } from '../context/AdminContext'
 import { api } from '../api'
 import { StatusDot } from './ui'
